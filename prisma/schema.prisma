@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id       Int       @id @default(autoincrement())
+    username String    @unique
+    name     String
+    password String
+    role     RoleUser? @default(USER)
+
+    absensis Absensi[]
+
+    @@map("user")
+}
+
+enum RoleUser {
+    ADMIN
+    USER
+}
+
+model Asrama {
+    id      Int     @id @default(autoincrement())
+    name    String  @unique
+    classes Kelas[]
+
+    @@map("asrama")
+}
+
+model Kelas {
+    id       Int     @id @default(autoincrement())
+    name     String
+    teacher  String
+    asramaId Int
+    asrama   Asrama  @relation(fields: [asramaId], references: [id])
+    students Siswa[]
+
+    @@map("kelas")
+}
+
+model Siswa {
+    id       Int       @id @default(autoincrement())
+    name     String
+    kelasId  Int
+    kelas    Kelas     @relation(fields: [kelasId], references: [id])
+    absesnis Absensi[]
+
+    @@map("siswa")
+}
+
+model Absensi {
+    id      Int         @id @default(autoincrement())
+    siswaId Int
+    siswa   Siswa       @relation(fields: [siswaId], references: [id])
+    date    DateTime    @default(now())
+    status  StatusAbsen @default(HADIR)
+
+    userId Int
+    user   User @relation(fields: [userId], references: [id])
+
+    @@map("absensi")
+}
+
+enum StatusAbsen {
+    HADIR
+    SAKIT
+    IZIN
+    ALFA
+}
