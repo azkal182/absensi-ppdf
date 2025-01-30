@@ -1,63 +1,78 @@
-import { Table, Box, Database } from "lucide-react";
+'use client'
 
+import * as React from 'react'
+import {
+  AudioWaveform,
+  BookOpen,
+  Bot,
+  Command,
+  Frame,
+  GalleryVerticalEnd,
+  Map,
+  PieChart,
+  Settings2,
+  SquareTerminal,
+} from 'lucide-react'
+
+import { NavMain } from '@/components/nav-main'
+import { NavUser } from '@/components/nav-user'
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import Link from "next/link";
+  SidebarFooter,
+  SidebarHeader,
+  SidebarRail,
+} from '@/components/ui/sidebar'
+import { TeamSwitcher } from './team-switcher'
+import { useCurrentSession } from '@/hooks/useCurrentUser'
+import { signOut } from 'next-auth/react'
 
-// Menu items.
-const items = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: Box,
+// This is sample data.
+const data = {
+  user: {
+    name: 'shadcn',
+    email: 'm@example.com',
+    avatar: '/avatars/shadcn.jpg',
   },
-  {
-    title: "Absensi",
-    url: "/absensi",
-    icon: Table,
-  },
-  {
-    title: "Laporan Absensi",
-    url: "/daftar",
-    icon: Table,
-  },
-  {
-    title: "master",
-    url: "#",
-    icon: Database,
-  },
-];
+  projects: [
+    {
+      name: 'Dahsboard',
+      url: '/dashboard',
+      icon: Frame,
+    },
+    {
+      name: 'Absensi',
+      url: '/absensi',
+      icon: PieChart,
+    },
+    {
+      name: 'Daftar Absensi',
+      url: '/daftar',
+      icon: Map,
+    },
+  ],
+}
 
-export function AppSidebar() {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { session } = useCurrentSession()
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader>
+        <TeamSwitcher />
+      </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Master</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <NavMain items={data.projects} />
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser
+          user={{
+            name: session?.user?.name as unknown as string,
+            email: session?.user?.username as unknown as string,
+            avatar: '/avatars/shadcn.jpg',
+          }}
+        />
+      </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
-  );
+  )
 }

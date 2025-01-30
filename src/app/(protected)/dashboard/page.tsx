@@ -1,14 +1,7 @@
-"use client";
+'use client'
 
-import { TrendingUp } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  LabelList,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { TrendingUp } from 'lucide-react'
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from 'recharts'
 
 import {
   Card,
@@ -17,35 +10,41 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card'
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
+} from '@/components/ui/chart'
+import ChartBulanan from './ChartBulanan'
+import ChartGlobal from './ChartGlobal'
 const chartData = [
   { month: "Na'im", desktop: 186 },
   { month: "Ma'wa", desktop: 305 },
-  { month: "Tasawwuf", desktop: 237 },
-  { month: "Darussalam", desktop: 73 },
-  { month: "Illiyyin", desktop: 209 },
-  { month: "Takhosus", desktop: 214 },
-];
+  { month: 'Tasawwuf', desktop: 237 },
+  { month: 'Darussalam', desktop: 73 },
+  { month: 'Illiyyin', desktop: 209 },
+  { month: 'Takhosus', desktop: 214 },
+]
 const chartConfig = {
   desktop: {
-    label: "Desktop",
-    color: "hsl(var(--chart-1))",
+    label: 'Desktop',
+    color: 'hsl(var(--chart-1))',
   },
   label: {
-    color: "hsl(var(--background))",
+    color: 'hsl(var(--background))',
   },
-} satisfies ChartConfig;
+} satisfies ChartConfig
 
 export default function Page() {
   return (
-    <div>
-      <div className="grid grid-cols-4">
+    <div className="flex flex-1 flex-col gap-4">
+      {/* <div className="grid grid-cols-4">
+
+      </div>
+      <ChartBulanan /> */}
+      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Bar Chart - Custom Label</CardTitle>
@@ -109,7 +108,11 @@ export default function Page() {
             </div>
           </CardFooter>
         </Card>
+        <ChartGlobal />
+        <div className="rounded-xl bg-muted/50" />
       </div>
+      {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" /> */}
+      <ChartBulanan />
     </div>
-  );
+  )
 }

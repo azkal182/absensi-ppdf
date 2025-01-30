@@ -1,19 +1,19 @@
-"use client";
+'use client'
 
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { useFormStatus } from "react-dom";
-import { Button } from "@/components/ui/button";
-import { signInSchema } from "@/schemas/loginSchema";
-import { login } from "@/actions/login";
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { useFormStatus } from 'react-dom'
+import { Button } from '@/components/ui/button'
+import { signInSchema } from '@/schemas/loginSchema'
+import { login } from '@/actions/login'
 
 const LoginForm = () => {
-  const [error, setError] = useState<string | undefined>("");
-  const { pending } = useFormStatus();
+  const [error, setError] = useState<string | undefined>('')
+  const { pending } = useFormStatus()
 
   const {
     register,
@@ -22,24 +22,24 @@ const LoginForm = () => {
   } = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      username: "",
-      password: "",
+      username: '',
+      password: '',
     },
-  });
+  })
 
   const onSubmit = async (values: z.infer<typeof signInSchema>) => {
     await login(values).then((data) => {
-      setError("");
+      setError('')
       if (data?.error) {
-        setError(data.error);
+        setError(data.error)
       }
-    });
-  };
+    })
+  }
 
   return (
     <>
       {error && (
-        <div className="mb-4 flex items-center rounded bg-danger-light p-3.5 text-danger dark:bg-danger-dark-light">
+        <div className="bg-danger-light text-danger dark:bg-danger-dark-light mb-4 flex items-center rounded p-3.5">
           <span className="ltr:pr-2 rtl:pl-2">
             <strong className="ltr:mr-1 rtl:ml-1">{error}!</strong>
           </span>
@@ -54,7 +54,7 @@ const LoginForm = () => {
             Username
           </Label>
           <Input
-            {...register("username")}
+            {...register('username')}
             autoComplete="off"
             id="username"
             name="username"
@@ -62,7 +62,7 @@ const LoginForm = () => {
             placeholder="Username"
           />
           {errors.username && (
-            <div className="mt-1 text-red-500 text-xs">
+            <div className="mt-1 text-xs text-red-500">
               {errors.username.message}
             </div>
           )}
@@ -72,7 +72,7 @@ const LoginForm = () => {
             Password
           </Label>
           <Input
-            {...register("password")}
+            {...register('password')}
             autoComplete="off"
             id="password"
             name="password"
@@ -80,7 +80,7 @@ const LoginForm = () => {
             placeholder="Password"
           />
           {errors.password && (
-            <div className="mt-1 text-red-500 text-xs">
+            <div className="mt-1 text-xs text-red-500">
               {errors.password.message}
             </div>
           )}
@@ -97,7 +97,7 @@ const LoginForm = () => {
         </div>
       </form>
     </>
-  );
-};
+  )
+}
 
-export default LoginForm;
+export default LoginForm

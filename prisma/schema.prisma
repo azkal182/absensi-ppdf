@@ -39,13 +39,15 @@ model Asrama {
 }
 
 model Kelas {
-    id       Int     @id @default(autoincrement())
+    id       Int       @id @default(autoincrement())
     name     String
     teacher  String
     asramaId Int
-    asrama   Asrama  @relation(fields: [asramaId], references: [id])
+    asrama   Asrama    @relation(fields: [asramaId], references: [id])
     students Siswa[]
+    Absensi  Absensi[]
 
+    @@unique([name, asramaId])
     @@map("kelas")
 }
 
@@ -56,6 +58,8 @@ model Siswa {
     kelas    Kelas     @relation(fields: [kelasId], references: [id])
     absesnis Absensi[]
 
+    @@unique([name, kelasId])
+    @@index([kelasId])
     @@map("siswa")
 }
 
@@ -63,12 +67,16 @@ model Absensi {
     id      Int         @id @default(autoincrement())
     siswaId Int
     siswa   Siswa       @relation(fields: [siswaId], references: [id])
+    kelasId Int // Tambahkan kelasId untuk akses lebih cepat
+    kelas   Kelas       @relation(fields: [kelasId], references: [id])
     date    DateTime    @default(now())
     status  StatusAbsen @default(HADIR)
 
-    userId Int
-    user   User @relation(fields: [userId], references: [id])
+    userId     Int
+    user       User         @relation(fields: [userId], references: [id])
+    JamAbsensi JamAbsensi[]
 
+    @@index([kelasId, date])
     @@map("absensi")
 }
 
@@ -77,4 +85,18 @@ enum StatusAbsen {
     SAKIT
     IZIN
     ALFA
+}
+
+model JamAbsensi {
+    id        Int     @id @default(autoincrement())
+    absensiId Int
+    absensi   Absensi @relation(fields: [absensiId], references: [id])
+
+    jamKe  Int
+    status StatusAbsen @default(HADIR)
+    date   DateTime    @default(now())
+
+    @@index([date])
+    @@index([jamKe])
+    @@map("jam_absensi")
 }
