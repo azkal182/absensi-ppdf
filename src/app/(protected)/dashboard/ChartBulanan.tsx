@@ -61,7 +61,7 @@ const chartData = [
   },
 ]
 
-const chartConfig = {
+const chartConfig: any = {
   category1: { label: 'Category 1', color: 'hsl(var(--chart-1))' },
   category2: { label: 'Category 2', color: 'hsl(var(--chart-2))' },
   category3: { label: 'Category 3', color: 'hsl(var(--chart-3))' },

@@ -14,7 +14,8 @@ export default {
         email: {},
         password: {},
       },
-      //    @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //    @ts-expect-error
       authorize: async (credentials) => {
         let user = null
 

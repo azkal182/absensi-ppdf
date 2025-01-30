@@ -13,7 +13,8 @@ import {
 
 // 2. Wrapped middleware option
 const { auth } = NextAuth(authConfig)
-//    @ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//    @ts-expect-error
 export default auth(async function middleware(req) {
   const { nextUrl } = req
 

@@ -169,6 +169,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
           description: 'Data berhasil disimpan',
         })
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast({
         variant: 'destructive',

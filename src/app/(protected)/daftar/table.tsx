@@ -10,13 +10,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Card } from '@/components/ui/card'
-import { useRouter } from 'next/navigation'
 import {
   getAsrama,
   getClassByAsramaId,
   getDaftarAbsen,
-  getDataByKelasId,
-  getKelasById,
 } from '@/actions/absenAction'
 import {
   Select,
@@ -28,7 +25,7 @@ import {
 import { KelasData } from '../absensi/tableData'
 import { Label } from '@/components/ui/label'
 
-const statusIcons = {
+const statusIcons: any = {
   HADIR: <CheckCircle className="mx-auto h-4 w-4 text-green-500" />,
   SAKIT: <AlertCircle className="mx-auto h-4 w-4 text-yellow-500" />,
   IZIN: <HelpCircle className="mx-auto h-4 w-4 text-blue-500" />,
@@ -132,6 +129,8 @@ export default function AbsensiTable() {
   const handleChangeKelas = async (kelasId: string) => {
     try {
       const data = await getDaftarAbsen(parseInt(kelasId), 2025, 1)
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       setAbsensi(data)
     } catch (error) {
       alert(error)
@@ -240,7 +239,7 @@ export default function AbsensiTable() {
             </TableHeader>
 
             <TableBody>
-              {absensi.map((siswa, index) => (
+              {absensi.map((siswa: any, index) => (
                 <TableRow key={siswa.id}>
                   <TableCell className="border p-2 text-center">
                     {index + 1}
@@ -256,7 +255,7 @@ export default function AbsensiTable() {
 
                     return availableHours.map((hour) => {
                       const entry = absensiForDay.find(
-                        (entry) => entry.jamKe === hour
+                        (entry: any) => entry.jamKe === hour
                       )
 
                       return (

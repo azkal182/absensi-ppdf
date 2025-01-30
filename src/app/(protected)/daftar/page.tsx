@@ -1,4 +1,3 @@
-import { getDaftarAbsen } from '@/actions/absenAction'
 import React from 'react'
 import AbsensiTable from './table'
 

@@ -21,6 +21,7 @@ export const useCurrentSession = () => {
       }
 
       setStatus('unauthenticated')
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setStatus('unauthenticated')
       setSession(null)

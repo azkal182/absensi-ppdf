@@ -14,6 +14,7 @@ export async function getAsrama() {
     })
 
     return asrama
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return []
   }
@@ -28,6 +29,7 @@ export async function getClassByAsramaId(asramaId: number) {
     })
 
     return result
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return []
   }
@@ -43,6 +45,7 @@ export async function getDataByKelasId(kelasId: number) {
     })
 
     return siswa
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return []
   }
@@ -174,6 +177,8 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
     return { success: true, count: transaksi.length }
   } catch (error) {
     console.error('Error saat menyimpan data absensi:', error)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     return { success: false, message: error.message }
   }
 }

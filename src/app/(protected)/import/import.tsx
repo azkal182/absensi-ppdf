@@ -1,14 +1,10 @@
 'use client'
 import { importData } from '@/actions/import'
-import { useState, ChangeEvent } from 'react'
+import { ChangeEvent } from 'react'
 import * as XLSX from 'xlsx'
 
-interface ExcelData {
-  [key: string]: string | number
-}
-
 export default function ImportPage() {
-  const [data, setData] = useState<ExcelData[]>([])
+  // const [data, setData] = useState<ExcelData[]>([])
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     // console.log("triggered");
@@ -36,7 +32,7 @@ export default function ImportPage() {
     <div style={{ padding: '20px' }}>
       <h1>Upload Excel File</h1>
       <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
-      <pre>{JSON.stringify(data, null, 2)}</pre>
+      {/*<pre>{JSON.stringify(data, null, 2)}</pre>*/}
     </div>
   )
 }

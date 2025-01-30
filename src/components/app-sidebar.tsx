@@ -1,18 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-} from 'lucide-react'
+import { Frame, Map, PieChart } from 'lucide-react'
 
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
@@ -25,7 +14,6 @@ import {
 } from '@/components/ui/sidebar'
 import { TeamSwitcher } from './team-switcher'
 import { useCurrentSession } from '@/hooks/useCurrentUser'
-import { signOut } from 'next-auth/react'
 
 // This is sample data.
 const data = {

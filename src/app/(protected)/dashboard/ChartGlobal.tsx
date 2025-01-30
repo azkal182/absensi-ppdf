@@ -61,7 +61,7 @@ const chartData = [
   },
 ]
 
-const chartConfig = {
+const chartConfig: any = {
   desktop: { label: 'Desktop', color: 'hsl(var(--chart-1))' },
   mobile: { label: 'Mobile', color: 'hsl(var(--chart-2))' },
   tablet: { label: 'Tablet', color: 'hsl(var(--chart-3))' },
