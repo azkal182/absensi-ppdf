@@ -3,6 +3,7 @@
 import { SelectedAttendance } from '@/app/(protected)/absensi/tableData'
 import prisma from '@/lib/prisma'
 import { StatusAbsen } from '@prisma/client'
+import { revalidateTag } from 'next/cache'
 
 export async function getAsrama() {
   try {
@@ -13,6 +14,7 @@ export async function getAsrama() {
       },
     })
 
+    revalidateTag('asrama')
     return asrama
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
@@ -27,6 +29,7 @@ export async function getClassByAsramaId(asramaId: number) {
         asramaId: asramaId,
       },
     })
+    revalidateTag('asrama')
 
     return result
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
