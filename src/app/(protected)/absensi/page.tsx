@@ -2,8 +2,12 @@ import { getAsrama } from '@/actions/absenAction'
 import TableData from './tableData'
 import { Card } from '@/components/ui/card'
 
+export const dynamic = 'force-dynamic'
+// const dynamic = 'force-dynamic'
+
 export default async function Home() {
   const data = await getAsrama()
+
   const today = new Date().toLocaleDateString()
 
   return (
