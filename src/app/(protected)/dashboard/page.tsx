@@ -20,12 +20,12 @@ import {
 import ChartBulanan from './ChartBulanan'
 import ChartGlobal from './ChartGlobal'
 const chartData = [
-  { month: "Na'im", desktop: 186 },
-  { month: "Ma'wa", desktop: 305 },
-  { month: 'Tasawwuf', desktop: 237 },
-  { month: 'Darussalam', desktop: 73 },
-  { month: 'Illiyyin', desktop: 209 },
-  { month: 'Takhosus', desktop: 214 },
+  { month: "Na'im", desktop: 90 },
+  { month: "Ma'wa", desktop: 89 },
+  { month: 'Tasawwuf', desktop: 87 },
+  { month: 'Darussalam', desktop: 92 },
+  { month: 'Illiyyin', desktop: 90 },
+  { month: 'Takhosus', desktop: 93 },
 ]
 const chartConfig = {
   desktop: {
@@ -47,8 +47,8 @@ export default function Page() {
       <div className="grid auto-rows-min gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Bar Chart - Custom Label</CardTitle>
-            <CardDescription>January - June 2024</CardDescription>
+            <CardTitle>Grafik kehadiran </CardTitle>
+            <CardDescription>January 2025</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig}>
@@ -99,14 +99,14 @@ export default function Page() {
               </BarChart>
             </ChartContainer>
           </CardContent>
-          <CardFooter className="flex-col items-start gap-2 text-sm">
+          {/* <CardFooter className="flex-col items-start gap-2 text-sm">
             <div className="flex gap-2 font-medium leading-none">
               Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
             </div>
             <div className="leading-none text-muted-foreground">
               Showing total visitors for the last 6 months
             </div>
-          </CardFooter>
+          </CardFooter> */}
         </Card>
         <ChartGlobal />
         <div className="rounded-xl bg-muted/50" />

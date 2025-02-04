@@ -46,10 +46,21 @@ model Kelas {
     asrama   Asrama    @relation(fields: [asramaId], references: [id])
     students Siswa[]
     Absensi  Absensi[]
+    // Teacher  Teacher[]
 
     @@unique([name, asramaId])
     @@map("kelas")
 }
+
+// model Teacher {
+//     id   Int    @id @default(autoincrement())
+//     name String
+
+//     kelasId Int
+//     kelas   Kelas @relation(fields: [kelasId], references: [id])
+
+//     @@map("teacher")
+// }
 
 model Siswa {
     id       Int       @id @default(autoincrement())
@@ -67,7 +78,7 @@ model Absensi {
     id      Int         @id @default(autoincrement())
     siswaId Int
     siswa   Siswa       @relation(fields: [siswaId], references: [id])
-    kelasId Int // Tambahkan kelasId untuk akses lebih cepat
+    kelasId Int
     kelas   Kelas       @relation(fields: [kelasId], references: [id])
     date    DateTime    @default(now())
     status  StatusAbsen @default(HADIR)

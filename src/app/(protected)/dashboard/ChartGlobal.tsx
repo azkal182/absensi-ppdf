@@ -75,10 +75,8 @@ export default function ChartGlobal() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Area Chart - Stacked</CardTitle>
-        <CardDescription>
-          Showing total visitors for the last 4 months
-        </CardDescription>
+        <CardTitle>Grafik kehadiran</CardTitle>
+        <CardDescription>4 bulan terakhir</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
@@ -114,7 +112,7 @@ export default function ChartGlobal() {
           </AreaChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter>
+      {/* <CardFooter>
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 font-medium leading-none">
@@ -125,7 +123,7 @@ export default function ChartGlobal() {
             </div>
           </div>
         </div>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   )
 }

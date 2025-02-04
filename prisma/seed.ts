@@ -90,29 +90,36 @@ async function main() {
   })
 
   // List asrama dan kelas
-  // const asramaList = ['Na’im', 'Tassawuf', 'Darussalam', 'Illiyyin', 'Ma’wa', 'Takhosus'];
-  // const kelasList = ['Thoharoh', 'Ubudiah', 'Mu’amalat', 'Munakahat'];
+  // const asramaList = [
+  //   'Na’im',
+  //   'Tassawuf',
+  //   'Darussalam',
+  //   'Illiyyin',
+  //   'Ma’wa',
+  //   'Takhosus',
+  // ]
+  // const kelasList = ['Thoharoh', 'Ubudiah', 'Mu’amalat', 'Munakahat']
 
   // Seed Asrama, Kelas, dan Siswa
   // for (let i = 0; i < asramaList.length; i++) {
-  //     const asramaName = asramaList[i];
-
-  //     await prisma.asrama.create({
-  //         data: {
-  //             name: asramaName,
-  //             classes: {
-  //                 create: kelasList.map((kelasName, index) => ({
-  //                     name: kelasName,
-  //                     teacher: `Ust ${String.fromCharCode(65 + index)}`, // Ust A, Ust B, ...
-  //                     students: {
-  //                         create: Array.from({ length: 10 }).map((_, studentIndex) => ({
-  //                             name: `Santri ${asramaName} ${kelasName} ${studentIndex + 1}`,
-  //                         })),
-  //                     },
-  //                 })),
-  //             },
-  //         },
-  //     });
+  //   const asramaName = asramaList[i]
+  //
+  //   await prisma.asrama.create({
+  //     data: {
+  //       name: asramaName,
+  //       classes: {
+  //         create: kelasList.map((kelasName, index) => ({
+  //           name: kelasName,
+  //           teacher: `Ust ${String.fromCharCode(65 + index)}`, // Ust A, Ust B, ...
+  //           students: {
+  //             create: Array.from({ length: 10 }).map((_, studentIndex) => ({
+  //               name: `Santri ${asramaName} ${kelasName} ${studentIndex + 1}`,
+  //             })),
+  //           },
+  //         })),
+  //       },
+  //     },
+  //   })
   // }
 
   // Seed Absensi
