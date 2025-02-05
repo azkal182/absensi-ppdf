@@ -62,6 +62,7 @@ export type SelectedAttendance = {
 }
 
 const TableData = ({ asrama }: { asrama: AsramaProps }) => {
+  const [asramaId, setAsramaId] = useState<number | undefined>()
   const [kelas, setKelas] = useState<KelasData | []>([])
   const [siswa, setSiswa] = useState<SiswaData | []>([])
   const [dialog, setDialog] = useState(false)
@@ -98,6 +99,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
   const handleChangeAsrama = async (asramaId: string) => {
     const id = parseInt(asramaId)
     try {
+      setAsramaId(id)
       const result = await getClassByAsramaId(id)
       setKelas(result)
       setSelectedAttendance((prev) => ({
@@ -123,8 +125,9 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
       setSelectedAttendance((prev) => ({
         ...prev,
         kelasId: id,
+        asramaId: asramaId,
         jamKe: parseInt(jamKe), // Gunakan nilai jamKe yang sudah ada
-        date: new Date(),
+        date: new Date(new Date().setDate(new Date().getDate() + 1)),
         data: defaultAttendance,
       }))
 

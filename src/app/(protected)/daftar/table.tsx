@@ -24,12 +24,64 @@ import {
 } from '@/components/ui/select'
 import { KelasData } from '../absensi/tableData'
 import { Label } from '@/components/ui/label'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const statusIcons: any = {
-  HADIR: <CheckCircle className="mx-auto h-4 w-4 text-green-500" />,
-  SAKIT: <AlertCircle className="mx-auto h-4 w-4 text-yellow-500" />,
-  IZIN: <HelpCircle className="mx-auto h-4 w-4 text-blue-500" />,
-  ALFA: <XCircle className="mx-auto h-4 w-4 text-red-500" />,
+  HADIR: (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <CheckCircle className="mx-auto h-4 w-4 text-green-500" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Hadir</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ),
+
+  SAKIT: (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <AlertCircle className="mx-auto h-4 w-4 text-yellow-500" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Sakit</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ),
+
+  IZIN: (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <HelpCircle className="mx-auto h-4 w-4 text-blue-500" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Izin</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ),
+  ALFA: (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <XCircle className="mx-auto h-4 w-4 text-red-500" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Alfa</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ),
 }
 
 export default function AbsensiTable() {
@@ -47,7 +99,6 @@ export default function AbsensiTable() {
   const [kelas, setKelas] = useState<KelasData | []>([])
 
   const [selectedMonthYear, setSelectedMonthYear] = useState<string>(
-    // Default: Bulan dan tahun saat ini
     `${new Date().toLocaleString('id-ID', {
       month: 'long',
     })} ${new Date().getFullYear()}`
@@ -95,7 +146,7 @@ export default function AbsensiTable() {
       const dayName = formatter.format(date)
 
       // Kecualikan Selasa (2) & Jumat (5)
-      if (dayOfWeek !== 2 && dayOfWeek !== 5) {
+      if (dayOfWeek !== 5) {
         currentWeek.push({ date: day, dayName })
       }
 
@@ -109,10 +160,11 @@ export default function AbsensiTable() {
 
     setWeeks(weeklyData)
     fetchAsrama()
-  }, [selectedMonthYear])
+  }, [selectedMonthYear, yearNumber, monthIndex])
 
   const fetchAsrama = async () => {
     const data = await getAsrama()
+
     setAsrama(data)
   }
 
@@ -128,7 +180,8 @@ export default function AbsensiTable() {
 
   const handleChangeKelas = async (kelasId: string) => {
     try {
-      const data = await getDaftarAbsen(parseInt(kelasId), 2025, 1)
+      const data = await getDaftarAbsen(parseInt(kelasId), 2025, 2)
+
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       setAbsensi(data)
@@ -191,89 +244,90 @@ export default function AbsensiTable() {
           </Select>
         </div>
       </div>
-      {weeks.map(({ week, days }) => (
-        <Card key={week} className="p-4">
-          <h2 className="mb-4 text-lg font-semibold">Minggu {week}</h2>
-          <Table className="overflow-x-auto">
-            <TableHeader>
-              <TableRow className="bg-gray-200 text-sm text-gray-700">
-                <TableHead rowSpan={2} className="border p-2 text-center">
-                  No
-                </TableHead>
-                <TableHead rowSpan={2} className="text-nowrap border p-2">
-                  Nama
-                </TableHead>
-                {days.map(({ date, dayName }) => (
-                  <TableHead
-                    key={date}
-                    colSpan={3}
-                    className="border p-2 text-center"
-                  >
-                    {dayName} ({date})
+      {absensi.length > 0 &&
+        weeks.map(({ week, days }) => (
+          <Card key={week} className="p-4">
+            <h2 className="mb-4 text-lg font-semibold">Minggu {week}</h2>
+            <Table className="overflow-x-auto">
+              <TableHeader>
+                <TableRow className="bg-gray-200 text-sm text-gray-700">
+                  <TableHead rowSpan={2} className="border p-2 text-center">
+                    No
                   </TableHead>
-                ))}
-              </TableRow>
-
-              <TableRow className="bg-gray-200 text-sm text-gray-700">
-                {days.flatMap(({ date }) => [
-                  <TableHead
-                    key={`day-${date}-1`}
-                    className="border p-2 text-center"
-                  >
-                    1
-                  </TableHead>,
-                  <TableHead
-                    key={`day-${date}-2`}
-                    className="border p-2 text-center"
-                  >
-                    2
-                  </TableHead>,
-                  <TableHead
-                    key={`day-${date}-3`}
-                    className="border p-2 text-center"
-                  >
-                    3
-                  </TableHead>,
-                ])}
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {absensi.map((siswa: any, index) => (
-                <TableRow key={siswa.id}>
-                  <TableCell className="border p-2 text-center">
-                    {index + 1}
-                  </TableCell>
-                  <TableCell className="text-nowrap border p-2">
-                    {siswa.name}
-                  </TableCell>
-
-                  {days.flatMap(({ date }) => {
-                    const absensiForDay = siswa.absensi[date] || []
-
-                    const availableHours = [1, 2, 3]
-
-                    return availableHours.map((hour) => {
-                      const entry = absensiForDay.find(
-                        (entry: any) => entry.jamKe === hour
-                      )
-
-                      return (
-                        <TableCell
-                          key={`day-${date}-${hour}`}
-                          className="border p-2 text-center"
-                        >
-                          {entry ? statusIcons[entry.status] : '-'}
-                        </TableCell>
-                      )
-                    })
-                  })}
+                  <TableHead rowSpan={2} className="text-nowrap border p-2">
+                    Nama
+                  </TableHead>
+                  {days.map(({ date, dayName }) => (
+                    <TableHead
+                      key={date}
+                      colSpan={3}
+                      className="border p-2 text-center"
+                    >
+                      {dayName} ({date})
+                    </TableHead>
+                  ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
-      ))}
+
+                <TableRow className="bg-gray-200 text-sm text-gray-700">
+                  {days.flatMap(({ date }) => [
+                    <TableHead
+                      key={`day-${date}-1`}
+                      className="border p-2 text-center"
+                    >
+                      1
+                    </TableHead>,
+                    <TableHead
+                      key={`day-${date}-2`}
+                      className="border p-2 text-center"
+                    >
+                      2
+                    </TableHead>,
+                    <TableHead
+                      key={`day-${date}-3`}
+                      className="border p-2 text-center"
+                    >
+                      3
+                    </TableHead>,
+                  ])}
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {absensi.map((siswa: any, index) => (
+                  <TableRow key={siswa.id}>
+                    <TableCell className="border p-2 text-center">
+                      {index + 1}
+                    </TableCell>
+                    <TableCell className="text-nowrap border p-2">
+                      {siswa.name}
+                    </TableCell>
+
+                    {days.flatMap(({ date }) => {
+                      const absensiForDay = siswa.absensi[date] || []
+
+                      const availableHours = [1, 2, 3]
+
+                      return availableHours.map((hour) => {
+                        const entry = absensiForDay.find(
+                          (entry: any) => entry.jamKe === hour
+                        )
+
+                        return (
+                          <TableCell
+                            key={`day-${date}-${hour}`}
+                            className="border p-2 text-center"
+                          >
+                            {entry ? statusIcons[entry.status] : '-'}
+                          </TableCell>
+                        )
+                      })
+                    })}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        ))}
     </div>
   )
 }

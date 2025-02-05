@@ -74,41 +74,78 @@ export const importData = async (workbook: any) => {
     const asramaName = sheetName
     const worksheet = workbook.Sheets[sheetName]
     const data: { [key: string]: any }[] = XLSX.utils.sheet_to_json(worksheet)
+    console.log(asramaName)
 
-    const kelasList: {
-      name: string
-      teacher: string
-      students: { name: string }[]
-    }[] = []
+    // await prisma.asrama.create({
+    //     data: {
+    //         name: asramaName
+    //     }
+    // });
+
+    const kelasMap = new Map<
+      string,
+      {
+        name: string
+        teachers: { name: string; siswas: { name: string }[] }[]
+      }
+    >()
 
     for (const row of data) {
-      const className: string = row['KELAS'].toUpperCase()
-      const teacherName: string =
+      const className = row['KELAS']?.toUpperCase() || 'UNKNOWN'
+      const teacherName =
         typeof row['WALI KELAS'] === 'string'
           ? row['WALI KELAS'].toUpperCase()
-          : row['WALI KELAS'].toString().toUpperCase()
-      const studentName: string = row['NAMA'].toUpperCase()
+          : row['WALI KELAS']
+            ? row['WALI KELAS'].toString().toUpperCase()
+            : null
+      const studentName = row['NAMA']?.toUpperCase() || 'UNKNOWN'
 
-      let kelas = kelasList.find((k) => k.name === className)
-      if (!kelas) {
-        kelas = { name: className, teacher: teacherName, students: [] }
-        kelasList.push(kelas)
+      // Jika kelas belum ada di dalam map, buat baru
+      if (!kelasMap.has(className)) {
+        kelasMap.set(className, {
+          name: className,
+          teachers: [],
+        })
       }
-      kelas.students.push({ name: studentName })
+
+      const kelas = kelasMap.get(className)!
+
+      // Cari guru yang sudah ada di dalam kelas ini
+      let teacher = kelas.teachers.find((t) => t.name === teacherName)
+
+      // Jika guru belum ada, tambahkan guru baru dengan daftar siswa kosong
+      if (!teacher) {
+        teacher = { name: teacherName, siswas: [] }
+        kelas.teachers.push(teacher)
+      }
+
+      // Tambahkan siswa ke dalam guru yang sesuai
+      teacher.siswas.push({ name: studentName })
+    }
+    const kelasList = Array.from(kelasMap.values())
+
+    const datas = {
+      name: asramaName,
+      classes: {
+        create: kelasList.flatMap((kelas) =>
+          kelas.teachers.map((teacher) => ({
+            name: kelas.name,
+            teacher: teacher.name,
+            students: teacher.siswas?.length
+              ? {
+                  create: teacher.siswas.map((student) => ({
+                    name: student.name.trim(),
+                  })),
+                }
+              : undefined,
+          }))
+        ),
+      },
     }
 
-    await prisma.asrama.create({
-      data: {
-        name: asramaName,
-        classes: {
-          create: kelasList.map((kelas) => ({
-            name: kelas.name,
-            teacher: kelas.teacher,
-            students: { create: kelas.students },
-          })),
-        },
-      },
-    })
+    await prisma.asrama.create({ data: datas })
+
+    // console.log(asramaName);
   }
 
   return { message: 'Data imported successfully' }

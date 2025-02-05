@@ -98,7 +98,9 @@ async function cekAbsensi(
 
 export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
   try {
-    const { data, jamKe, date, kelasId } = dataAbsens
+    console.log(dataAbsens)
+
+    const { data, jamKe, date, kelasId, asramaId } = dataAbsens
 
     if (!userId) {
       throw new Error('User ID tidak valid.')
@@ -110,7 +112,7 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
       throw new Error('User ID tidak ditemukan.')
     }
 
-    if (!jamKe || !date || !kelasId) {
+    if (!jamKe || !date || !kelasId || !asramaId) {
       throw new Error('data tidak valid.')
     }
 
@@ -152,6 +154,7 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
           data: {
             siswaId: item.siswaId,
             userId,
+            asramaId,
             kelasId: kelasId,
             status: item.status as StatusAbsen,
             date: tanggalAbsensi,
@@ -215,6 +218,22 @@ export async function cekAbsensiMultiJam(
     },
     {} as Record<number, boolean>
   )
+}
+
+export async function getAsramaWithFullData() {
+  const data = await prisma.asrama.findMany({
+    include: {
+      _count: true,
+      classes: {
+        include: {
+          _count: true,
+        },
+      },
+    },
+  })
+  console.log(JSON.stringify(data, null, 2))
+
+  return data
 }
 
 export async function getDaftarAbsen(
@@ -296,5 +315,162 @@ export const getKelasById = async (kelasId: number) => {
   } catch (error) {
     console.error('Error fetching kelas:', error)
     return { error: 'Terjadi kesalahan saat mengambil data kelas.' }
+  }
+}
+
+export async function getChartThisMonth() {
+  try {
+    const startDate = new Date(2025, 2 - 1, 1)
+    const endDate = new Date(2025, 2, 0)
+    const absensiByAsrama = await prisma.asrama.findMany({
+      include: {
+        Absensi: {
+          where: {
+            date: {
+              gte: startDate.toISOString(),
+              lte: endDate.toISOString(),
+            },
+          },
+          select: {
+            status: true,
+            date: true,
+          },
+        },
+      },
+    })
+
+    const formattedResult = absensiByAsrama.map((asrama) => {
+      const statusCount = asrama.Absensi.reduce(
+        (acc, absen) => {
+          acc[absen.status] = (acc[absen.status] || 0) + 1
+          return acc
+        },
+        {} as Record<string, number>
+      )
+
+      const totalAbsensi = asrama.Absensi.length
+      // Menghitung total hari unik dalam pengabsenan
+      const uniqueDates = new Set(
+        asrama.Absensi.map(
+          (absen) => new Date(absen.date).toISOString().split('T')[0]
+        )
+      )
+      const totalDays = uniqueDates.size // Jumlah tanggal unik
+
+      // Jika totalAbsensi = 0, anggap semua 100% HADIR
+      const percent =
+        totalAbsensi === 0
+          ? { HADIR: '100%', SAKIT: '0%', IZIN: '0%', ALFA: '0%' }
+          : {
+              HADIR:
+                (((statusCount.HADIR || 0) / totalAbsensi) * 100).toFixed(2) +
+                '%',
+              SAKIT:
+                (((statusCount.SAKIT || 0) / totalAbsensi) * 100).toFixed(2) +
+                '%',
+              IZIN:
+                (((statusCount.IZIN || 0) / totalAbsensi) * 100).toFixed(2) +
+                '%',
+              ALFA:
+                (((statusCount.ALFA || 0) / totalAbsensi) * 100).toFixed(2) +
+                '%',
+            }
+
+      return {
+        asrama: asrama.name,
+        totalDays,
+        totalAbsensi,
+        HADIR: statusCount.HADIR || 0,
+        SAKIT: statusCount.SAKIT || 0,
+        IZIN: statusCount.IZIN || 0,
+        ALFA: statusCount.ALFA || 0,
+        percent,
+      }
+    })
+
+    return formattedResult
+  } catch (error) {
+    console.error('Error fetching absensi:', error)
+    // return { error: 'Terjadi kesalahan saat mengambil data absensi.' }
+    return []
+  }
+}
+
+export async function getDaftarAlfa(
+  asramaId: number,
+  year: number,
+  month: number
+) {
+  try {
+    const startDate = new Date(year, month - 1, 1)
+    const endDate = new Date(year, month, 0)
+
+    const absensiAlfa = await prisma.absensi.findMany({
+      where: {
+        date: {
+          gte: startDate.toISOString(),
+          lte: endDate.toISOString(),
+        },
+        asramaId,
+        OR: [
+          { status: 'ALFA' },
+          {
+            JamAbsensi: {
+              some: { status: 'ALFA' },
+            },
+          },
+        ],
+      },
+      include: {
+        siswa: true,
+        JamAbsensi: {
+          select: {
+            jamKe: true,
+            status: true,
+            date: true,
+          },
+          orderBy: { jamKe: 'asc' },
+        },
+      },
+      orderBy: [{ siswaId: 'asc' }, { date: 'asc' }],
+    })
+
+    if (!absensiAlfa || absensiAlfa.length === 0) {
+      return []
+    }
+
+    const siswaMap = new Map()
+
+    absensiAlfa.forEach((absensi) => {
+      const siswaId = absensi.siswa?.id ?? 0
+      if (!siswaMap.has(siswaId)) {
+        siswaMap.set(siswaId, {
+          id: siswaId,
+          name: absensi.siswa?.name ?? 'Unknown',
+          alfa: [],
+        })
+      }
+
+      const formattedDate = new Date(absensi.date).toISOString().split('T')[0]
+      const existingEntry = siswaMap
+        .get(siswaId)
+        .alfa.find((entry: any) => entry.date === formattedDate)
+
+      if (existingEntry) {
+        existingEntry.jamKe.push(...absensi.JamAbsensi.map((jam) => jam.jamKe))
+      } else {
+        siswaMap.get(siswaId).alfa.push({
+          date: formattedDate,
+          jamKe: absensi.JamAbsensi.map((jam) => jam.jamKe),
+          status: 'ALFA',
+        })
+      }
+    })
+    console.log(JSON.stringify(Array.from(siswaMap.values()), null, 2))
+
+    return Array.from(siswaMap.values())
+  } catch (error) {
+    console.error('Error fetching absensi ALFA:', error)
+    return { error: 'Terjadi kesalahan saat mengambil data absensi ALFA.' }
   }
 }

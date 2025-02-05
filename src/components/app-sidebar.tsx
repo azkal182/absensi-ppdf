@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Frame, Map, PieChart } from 'lucide-react'
+import { LayoutDashboard, ListCheck, ListChecks, Skull } from 'lucide-react'
 
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
@@ -26,17 +26,22 @@ const data = {
     {
       name: 'Dahsboard',
       url: '/dashboard',
-      icon: Frame,
+      icon: LayoutDashboard,
     },
     {
       name: 'Absensi',
       url: '/absensi',
-      icon: PieChart,
+      icon: ListCheck,
     },
     {
       name: 'Daftar Absensi',
       url: '/daftar',
-      icon: Map,
+      icon: ListChecks,
+    },
+    {
+      name: 'Pelanggaran',
+      url: '/pelanggaran',
+      icon: Skull,
     },
   ],
 }

@@ -31,9 +31,10 @@ enum RoleUser {
 }
 
 model Asrama {
-    id      Int     @id @default(autoincrement())
-    name    String  @unique
+    id      Int       @id @default(autoincrement())
+    name    String    @unique
     classes Kelas[]
+    Absensi Absensi[]
 
     @@map("asrama")
 }
@@ -44,23 +45,12 @@ model Kelas {
     teacher  String
     asramaId Int
     asrama   Asrama    @relation(fields: [asramaId], references: [id])
-    students Siswa[]
+    Siswas   Siswa[]
     Absensi  Absensi[]
-    // Teacher  Teacher[]
 
-    @@unique([name, asramaId])
+    @@unique([name, asramaId, teacher])
     @@map("kelas")
 }
-
-// model Teacher {
-//     id   Int    @id @default(autoincrement())
-//     name String
-
-//     kelasId Int
-//     kelas   Kelas @relation(fields: [kelasId], references: [id])
-
-//     @@map("teacher")
-// }
 
 model Siswa {
     id       Int       @id @default(autoincrement())
@@ -75,19 +65,21 @@ model Siswa {
 }
 
 model Absensi {
-    id      Int         @id @default(autoincrement())
-    siswaId Int
-    siswa   Siswa       @relation(fields: [siswaId], references: [id])
-    kelasId Int
-    kelas   Kelas       @relation(fields: [kelasId], references: [id])
-    date    DateTime    @default(now())
-    status  StatusAbsen @default(HADIR)
+    id       Int         @id @default(autoincrement())
+    siswaId  Int
+    siswa    Siswa       @relation(fields: [siswaId], references: [id])
+    kelasId  Int
+    kelas    Kelas       @relation(fields: [kelasId], references: [id])
+    asramaId Int
+    asrama   Asrama      @relation(fields: [asramaId], references: [id])
+    date     DateTime    @default(now())
+    status   StatusAbsen @default(HADIR)
 
     userId     Int
     user       User         @relation(fields: [userId], references: [id])
     JamAbsensi JamAbsensi[]
 
-    @@index([kelasId, date])
+    @@index([kelasId, date, asramaId])
     @@map("absensi")
 }
 

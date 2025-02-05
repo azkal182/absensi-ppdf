@@ -71,6 +71,8 @@ const prisma = new PrismaClient()
 
 async function main() {
   // Hapus data sebelumnya dengan urutan yang benar
+  // await prisma.$executeRawUnsafe(`TRUNCATE TABLE "JamAbsensi", "Absensi", "Siswa", "Kelas", "Asrama", "User" RESTART IDENTITY CASCADE`);
+
   await prisma.$transaction([
     prisma.jamAbsensi.deleteMany(),
     prisma.absensi.deleteMany(),
