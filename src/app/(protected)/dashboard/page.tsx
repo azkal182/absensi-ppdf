@@ -2,6 +2,7 @@ import { getChartThisMonth } from '@/actions/absenAction'
 import ChartThisMonth from './ChartThisMonth'
 import { BarChartPerAsrama } from './BarChartPerAsrama'
 
+export const dynamic = 'force-dynamic'
 export default async function Page() {
   const thisMonth = await getChartThisMonth()
 
