@@ -3,6 +3,7 @@
 import { SelectedAttendance } from '@/app/(protected)/absensi/tableData'
 import prisma from '@/lib/prisma'
 import { StatusAbsen } from '@prisma/client'
+import { revalidatePath } from 'next/cache'
 
 export async function getAsrama() {
   try {
@@ -393,6 +394,8 @@ export async function getChartThisMonth() {
     console.error('Error fetching absensi:', error)
     // return { error: 'Terjadi kesalahan saat mengambil data absensi.' }
     return []
+  } finally {
+    revalidatePath('/dashboard')
   }
 }
 

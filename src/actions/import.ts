@@ -131,7 +131,7 @@ export const importData = async (workbook: any) => {
           kelas.teachers.map((teacher) => ({
             name: kelas.name,
             teacher: teacher.name,
-            students: teacher.siswas?.length
+            Siswas: teacher.siswas?.length
               ? {
                   create: teacher.siswas.map((student) => ({
                     name: student.name.trim(),
