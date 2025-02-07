@@ -39,7 +39,7 @@ const data = {
       icon: ListChecks,
     },
     {
-      name: 'Pelanggaran',
+      name: 'Daftar Alfa',
       url: '/pelanggaran',
       icon: Skull,
     },
@@ -54,7 +54,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.projects} />
+        <NavMain items={data.projects} role={session?.user?.role} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser

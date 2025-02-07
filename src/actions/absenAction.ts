@@ -3,6 +3,9 @@
 import { SelectedAttendance } from '@/app/(protected)/absensi/tableData'
 import prisma from '@/lib/prisma'
 import { StatusAbsen } from '@prisma/client'
+import { fromZonedTime, toZonedTime } from 'date-fns-tz'
+
+// const TIMEZONE = process.env.NEXT_PUBLIC_TIMEZONE as string;
 
 export async function getAsrama() {
   try {
@@ -14,7 +17,6 @@ export async function getAsrama() {
     })
 
     return asrama
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     console.log(error)
     return []
@@ -78,14 +80,10 @@ async function cekAbsensi(
   tanggal: Date,
   jamKe: number
 ): Promise<boolean> {
-  // Normalisasi tanggal agar hanya memeriksa bagian tanggal (tanpa jam)
-  const tanggalAbsensi = new Date(tanggal)
-  tanggalAbsensi.setHours(0, 0, 0, 0)
-
   const absensi = await prisma.jamAbsensi.findFirst({
     where: {
       jamKe: jamKe,
-      date: tanggalAbsensi, // Ubah dari rentang gte-lte menjadi pencocokan langsung
+      date: tanggal, // Ubah dari rentang gte-lte menjadi pencocokan langsung
       absensi: {
         kelasId: kelasId, // Pastikan hubungan ke kelasId benar
       },
@@ -98,14 +96,11 @@ async function cekAbsensi(
 
 export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
   try {
-    console.log(dataAbsens)
-
     const { data, jamKe, date, kelasId, asramaId } = dataAbsens
 
     if (!userId) {
       throw new Error('User ID tidak valid.')
     }
-    console.log({ userId })
 
     const checkUser = await prisma.user.findUnique({ where: { id: userId } })
     if (!checkUser) {
@@ -121,12 +116,24 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
     }
 
     const tanggalAbsensi = new Date(date)
-    tanggalAbsensi.setHours(0, 0, 0, 0) // Normalisasi ke format tanggal tanpa waktu
+    tanggalAbsensi.setHours(0, 0, 0, 0)
+    const jakartaDate = new Date(date) // Get the current date
+    const jakartaDateWithTime = toZonedTime(jakartaDate, 'Asia/Jakarta') // Convert to Asia/Jakarta time
+    jakartaDateWithTime.setHours(0, 0, 0, 0) // Set the time to 00:00
+
+    // Step 2: Convert the Jakarta time to UTC and keep it as a Date object
+    const utcDate = fromZonedTime(jakartaDateWithTime, 'Asia/Jakarta')
+
+    // Step 3: You now have a Date object in UTC
+    console.log('Asia/Jakarta Time:', jakartaDateWithTime)
+    console.log('Converted UTC Date:', utcDate)
 
     console.log(tanggalAbsensi)
 
-    const absensiIsReady = await cekAbsensi(kelasId, tanggalAbsensi, jamKe)
-    console.log({ absensiIsReady })
+    const tanggalAbsensiUTC = fromZonedTime(tanggalAbsensi, 'Asia/Jakarta')
+    console.log(tanggalAbsensiUTC)
+
+    const absensiIsReady = await cekAbsensi(kelasId, tanggalAbsensiUTC, jamKe)
 
     if (absensiIsReady) {
       return { success: false, message: 'jam Absensi hari ini sudah diisi' } // Kembalikan false bukan throw error
@@ -144,7 +151,7 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
       let absensi = await prisma.absensi.findFirst({
         where: {
           siswaId: item.siswaId,
-          date: tanggalAbsensi,
+          date: tanggalAbsensiUTC,
         },
       })
 
@@ -157,7 +164,7 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
             asramaId,
             kelasId: kelasId,
             status: item.status as StatusAbsen,
-            date: tanggalAbsensi,
+            date: tanggalAbsensiUTC,
           },
         })
       }
@@ -169,7 +176,7 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
             absensiId: absensi.id,
             jamKe: jamKe,
             status: item.status as StatusAbsen,
-            date: tanggalAbsensi, // Waktu sekarang saat absensi dicatat
+            date: tanggalAbsensiUTC, // Waktu sekarang saat absensi dicatat
           },
         })
       )
@@ -231,7 +238,6 @@ export async function getAsramaWithFullData() {
       },
     },
   })
-  console.log(JSON.stringify(data, null, 2))
 
   return data
 }
@@ -242,8 +248,9 @@ export async function getDaftarAbsen(
   month: number
 ) {
   try {
-    const startDate = new Date(year, month - 1, 1)
-    const endDate = new Date(year, month, 0)
+    // Create UTC start and end dates for the given month and year
+    const startDate = new Date(Date.UTC(year, month - 1, 1)) // 1st day of the month in UTC
+    const endDate = new Date(Date.UTC(year, month, 0)) // Last day of the month in UTC
 
     const absensiList = await prisma.absensi.findMany({
       where: {
@@ -269,14 +276,14 @@ export async function getDaftarAbsen(
     })
 
     if (!absensiList || absensiList.length === 0) {
-      return [] // Return array kosong jika tidak ada data
+      return [] // Return empty array if no data is found
     }
 
-    // Struktur data agar lebih mudah diolah
+    // Structure the data for easier processing
     const siswaMap = new Map()
 
     absensiList.forEach((absensi) => {
-      const siswaId = absensi.siswa?.id ?? 0 // Pastikan siswa ada
+      const siswaId = absensi.siswa?.id ?? 0 // Ensure siswa exists
       if (!siswaMap.has(siswaId)) {
         siswaMap.set(siswaId, {
           id: siswaId,
@@ -285,14 +292,16 @@ export async function getDaftarAbsen(
         })
       }
 
-      const formattedDate = new Date(absensi.date).getDate()
+      // Convert the UTC date to Asia/Jakarta timezone
+      const jakartaDate = toZonedTime(absensi.date, 'Asia/Jakarta')
+      const formattedDate = new Date(jakartaDate).getDate() // Extract the day
 
-      // Jika belum ada absensi untuk tanggal ini, buat objek kosong
+      // If no attendance for this date yet, initialize an empty object
       if (!siswaMap.get(siswaId).absensi[formattedDate]) {
         siswaMap.get(siswaId).absensi[formattedDate] = []
       }
 
-      // Tambahkan semua jamKe yang tersedia untuk tanggal ini
+      // Add all available jamKe for this date
       absensi.JamAbsensi.forEach((jam) => {
         siswaMap.get(siswaId).absensi[formattedDate].push({
           jamKe: jam.jamKe,

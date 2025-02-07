@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import {
   Select,
   SelectContent,
@@ -34,6 +34,7 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentSession } from '@/hooks/useCurrentUser'
 import { Label } from '@/components/ui/label'
+import SearchInput from '@/components/search-input'
 
 export type AsramaProps = {
   name: string
@@ -66,12 +67,13 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
   const [kelas, setKelas] = useState<KelasData | []>([])
   const [siswa, setSiswa] = useState<SiswaData | []>([])
   const [dialog, setDialog] = useState(false)
-  const [jamKe, setJamKe] = useState<string>('1')
+  const [jamKe, setJamKe] = useState<string | undefined>()
   const [avail, setAvail] = useState<Record<number, boolean>>({
     '1': true,
     '2': true,
     '3': true,
   })
+  const selectRef = useRef<HTMLButtonElement | null>(null)
   const [selectedAttendance, setSelectedAttendance] =
     useState<SelectedAttendance>({
       kelasId: undefined,
@@ -80,6 +82,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
       date: undefined,
       data: [],
     })
+  const [query, setQuery] = useState('')
   const { session } = useCurrentSession()
 
   const { toast } = useToast()
@@ -126,14 +129,14 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
         ...prev,
         kelasId: id,
         asramaId: asramaId,
-        jamKe: parseInt(jamKe), // Gunakan nilai jamKe yang sudah ada
-        date: new Date(new Date().setDate(new Date().getDate() + 1)),
+        // jamKe: parseInt(jamKe), // Gunakan nilai jamKe yang sudah ada
+        date: new Date(new Date().setDate(new Date().getDate())),
         data: defaultAttendance,
       }))
 
       const test = await cekAbsensiMultiJam(id, new Date(), [1, 2, 3])
       setAvail(test)
-      console.log(test)
+      //   console.log(test)
     } catch (error) {
       alert(error)
     }
@@ -171,6 +174,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
           title: 'Sukses',
           description: 'Data berhasil disimpan',
         })
+        setJamKe(undefined)
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
@@ -183,10 +187,30 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
   }
 
   const handleConfirm = async () => {
+    if (!jamKe) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Jam ke belum dipilih',
+      })
+      selectRef.current?.focus()
+
+      return
+    }
     if (selectedAttendance.data.length > 0 && jamKe) {
       setDialog(true)
     }
   }
+
+  const handleSearch = (query: string) => {
+    setQuery(query)
+  }
+
+  const filteredSiswa = useMemo(() => {
+    return siswa.filter((item) =>
+      item.name.toLowerCase().includes(query.toLowerCase())
+    )
+  }, [siswa, query])
 
   return (
     <div className="container mx-auto p-6">
@@ -226,7 +250,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
         <div>
           <Label>Jam</Label>
           <Select
-            value={jamKe}
+            value={jamKe ?? ''}
             onValueChange={(val) => {
               setJamKe(val)
               setSelectedAttendance((prev) => ({
@@ -235,7 +259,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
               }))
             }}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger ref={selectRef} className="w-full">
               <SelectValue placeholder="Jam Ke" />
             </SelectTrigger>
             <SelectContent>
@@ -274,6 +298,14 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
         </ul>
       </div>
 
+      <div className="mb-4 ml-auto w-full md:max-w-[300px]">
+        <SearchInput
+          value={query}
+          placeholder="Cari Nama"
+          onChange={(e) => handleSearch(e.target.value)}
+        />
+      </div>
+
       <Table className="overflow-hidden rounded-lg border border-gray-300">
         <TableCaption>Daftar Kehadiran Siswa</TableCaption>
         <TableHeader className="bg-gray-200">
@@ -287,7 +319,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {siswa?.map((item, index) => (
+          {filteredSiswa?.map((item, index) => (
             <TableRow key={index}>
               <TableCell className="text-center">{index + 1}</TableCell>
               <TableCell>{item.name}</TableCell>

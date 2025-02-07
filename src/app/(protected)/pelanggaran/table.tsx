@@ -12,7 +12,13 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 
+import { addMonths, format, subDays } from 'date-fns'
+
+import DateRangeSelector from '@/components/DateRangeSelector'
+
 export default function AbsensiTable() {
+  const today = new Date()
+
   const [weeks, setWeeks] = useState<
     { week: number; days: { date: number; dayName: string }[] }[]
   >([])
@@ -23,8 +29,10 @@ export default function AbsensiTable() {
       }[]
     | []
   >([])
-
+  const [date, setDate] = useState<Date>(new Date())
   const [absensi, setAbsensi] = useState([])
+
+  const formattedDate = format(new Date(date), 'PPP')
 
   const [selectedMonthYear, setSelectedMonthYear] = useState<string>(
     `${new Date().toLocaleString('id-ID', {
@@ -150,12 +158,51 @@ export default function AbsensiTable() {
             </SelectContent>
           </Select>
         </div>
+        <div>
+          <Select
+            value={date as any}
+            onValueChange={(val) => {
+              setDate(val as any)
+              console.log(val)
+            }}
+          >
+            <SelectTrigger className="w-[280px]">
+              <SelectValue placeholder="Select Date">
+                {formattedDate}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={today.toISOString()}>Today</SelectItem>
+              <SelectItem value={subDays(today, 3).toISOString()}>
+                3 Days Ago
+              </SelectItem>
+              <SelectItem value={subDays(today, 7).toISOString()}>
+                A Week Ago
+              </SelectItem>
+
+              {/* Menambahkan pilihan bulan ke depan secara dinamis */}
+              {[...Array(6)].map((_, index) => {
+                const monthDate = addMonths(today, index + 1)
+                return (
+                  <SelectItem key={index} value={monthDate.toISOString()}>
+                    {format(monthDate, 'MMMM yyyy')}
+                  </SelectItem>
+                )
+              })}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       {/* {weeks.map(({ week, days }) => (
         <Card key={week} className="p-4">
           <h2 className="mb-4 text-lg font-semibold">Minggu {week}</h2>
         </Card>
       ))} */}
+      <DateRangeSelector
+        onDateRangeChange={(val) => {
+          alert(JSON.stringify(val))
+        }}
+      />
     </div>
   )
 }

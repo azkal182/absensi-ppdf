@@ -3,9 +3,10 @@ import ChartThisMonth from './ChartThisMonth'
 import { BarChartPerAsrama } from './BarChartPerAsrama'
 
 export const dynamic = 'force-dynamic'
+
 export default async function Page() {
   const thisMonth = await getChartThisMonth()
-
+  console.log(JSON.stringify(thisMonth, null, 2))
   return (
     <div className="flex flex-1 flex-col gap-4">
       {/* <div className="grid grid-cols-4">

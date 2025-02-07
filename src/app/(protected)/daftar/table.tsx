@@ -30,6 +30,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+// import { toZonedTime } from 'date-fns-tz'
 
 const statusIcons: any = {
   HADIR: (
@@ -145,10 +146,10 @@ export default function AbsensiTable() {
       const dayOfWeek = date.getDay()
       const dayName = formatter.format(date)
 
-      // Kecualikan Selasa (2) & Jumat (5)
-      if (dayOfWeek !== 5) {
-        currentWeek.push({ date: day, dayName })
-      }
+      // Kecualikan Selasa (3) & Jumat (6)
+      //   if (dayOfWeek !== 6) {
+      currentWeek.push({ date: day, dayName })
+      //   }
 
       // Jika hari Sabtu atau hari terakhir dalam bulan, buat minggu baru
       if (dayOfWeek === 6 || day === days) {
@@ -164,7 +165,6 @@ export default function AbsensiTable() {
 
   const fetchAsrama = async () => {
     const data = await getAsrama()
-
     setAsrama(data)
   }
 
@@ -181,7 +181,22 @@ export default function AbsensiTable() {
   const handleChangeKelas = async (kelasId: string) => {
     try {
       const data = await getDaftarAbsen(parseInt(kelasId), 2025, 2)
+      console.log(data)
 
+      // Convert all UTC dates to Asia/Jakarta timezone
+      //   const convertedData = data.map((siswa: any) => {
+      //     return {
+      //       ...siswa,
+      //       absensi: siswa.absensi.map((absen: any) => {
+      //         if (absen.date) {
+      //           // Assuming absen.date is a UTC date string
+      //           const jakartaDate = toZonedTime(absen.date, 'Asia/Jakarta')
+      //           return { ...absen, date: jakartaDate }
+      //         }
+      //         return absen
+      //       }),
+      //     }
+      //   })
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       setAbsensi(data)
@@ -311,6 +326,8 @@ export default function AbsensiTable() {
                         const entry = absensiForDay.find(
                           (entry: any) => entry.jamKe === hour
                         )
+                        console.log(date)
+                        console.log(siswa.absensi)
 
                         return (
                           <TableCell

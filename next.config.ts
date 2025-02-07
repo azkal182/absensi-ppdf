@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  env: {
+    NEXT_PUBLIC_TIMEZONE: process.env.NEXT_PUBLIC_TIMEZONE || 'Asia/Jakarta',
+  },
 }
 
 export default nextConfig

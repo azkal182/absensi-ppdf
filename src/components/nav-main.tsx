@@ -13,12 +13,14 @@ import Link from 'next/link'
 
 export function NavMain({
   items,
+  role,
 }: {
   items: {
     name: string
     url: string
     icon: LucideIcon
   }[]
+  role: any
 }) {
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -37,14 +39,16 @@ export function NavMain({
       </SidebarMenu>
       <SidebarGroupLabel>Master</SidebarGroupLabel>
       <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton asChild>
-            <Link href={'/import'}>
-              <Upload />
-              <span>Import</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+        {role === 'ADMIN' && (
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href={'/import'}>
+                <Upload />
+                <span>Import</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
         <SidebarMenuItem>
           <SidebarMenuButton asChild>
             <Link href={'/data'}>
