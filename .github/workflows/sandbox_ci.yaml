@@ -24,7 +24,7 @@ jobs:
         run: npm install -g pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Print DATABASE_URL
         run: echo ${{ secrets.DATABASE_URL }}
