@@ -133,7 +133,7 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
     const tanggalAbsensiUTC = fromZonedTime(tanggalAbsensi, 'Asia/Jakarta')
     console.log(tanggalAbsensiUTC)
 
-    const absensiIsReady = await cekAbsensi(kelasId, tanggalAbsensiUTC, jamKe)
+    const absensiIsReady = await cekAbsensi(kelasId, utcDate, jamKe)
 
     if (absensiIsReady) {
       return { success: false, message: 'jam Absensi hari ini sudah diisi' } // Kembalikan false bukan throw error
@@ -151,7 +151,7 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
       let absensi = await prisma.absensi.findFirst({
         where: {
           siswaId: item.siswaId,
-          date: tanggalAbsensiUTC,
+          date: utcDate,
         },
       })
 
@@ -164,7 +164,7 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
             asramaId,
             kelasId: kelasId,
             status: item.status as StatusAbsen,
-            date: tanggalAbsensiUTC,
+            date: utcDate,
           },
         })
       }
@@ -176,7 +176,7 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
             absensiId: absensi.id,
             jamKe: jamKe,
             status: item.status as StatusAbsen,
-            date: tanggalAbsensiUTC, // Waktu sekarang saat absensi dicatat
+            date: utcDate, // Waktu sekarang saat absensi dicatat
           },
         })
       )
