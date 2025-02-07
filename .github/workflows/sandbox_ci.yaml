@@ -72,7 +72,7 @@ jobs:
         run: |
           rsync -avz --delete .next/ azkal@165.22.106.176:/home/azkal/project/absensi/.next/
           rsync -avz --delete public/ azkal@165.22.106.176:/home/azkal/project/absensi/public/
-          rsync -avz --delete package.json pnpm.lock azkal@165.22.106.176:/home/azkal/project/absensi/
+          rsync -avz --delete package.json pnpm-lock.yaml azkal@165.22.106.176:/home/azkal/project/absensi/
 
       - name: Install Dependencies and Restart App
         run: |
