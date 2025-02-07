@@ -102,6 +102,9 @@ jobs:
               sed -i '/^AUTH_TRUST_HOST=/d' .env
               echo "AUTH_TRUST_HOST=\"https://absensi.amtsilatipusat.com\"" >> .env
 
+              sed -i '/^AUTH_SECRET=/d' .env
+              echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}" >> .env
+
 
               # Restart aplikasi dengan PM2 tanpa build
               pm2 start npm --name "absensi" -- start -- -p 4040
