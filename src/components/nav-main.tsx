@@ -1,6 +1,6 @@
 'use client'
 
-import { BoxIcon, Upload, type LucideIcon } from 'lucide-react'
+import { BoxIcon, Upload, UsersIcon, type LucideIcon } from 'lucide-react'
 
 import {
   SidebarGroup,
@@ -54,6 +54,14 @@ export function NavMain({
             <Link href={'/data'}>
               <BoxIcon />
               <span>Data</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild>
+            <Link href={'/users'}>
+              <UsersIcon />
+              <span>Users</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
