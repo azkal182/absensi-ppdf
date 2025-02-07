@@ -104,7 +104,7 @@ jobs:
 
 
               # Restart aplikasi dengan PM2 tanpa build
-              pm2 start npm --name "absensi" -- start -- -p 6000
+              pm2 start npm --name "absensi" -- start -- -p 4040
 
               # Keluar dari SSH
               exit
