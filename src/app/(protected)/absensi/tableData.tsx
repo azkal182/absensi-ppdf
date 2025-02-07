@@ -72,6 +72,8 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
     '1': true,
     '2': true,
     '3': true,
+    '4': true,
+    '5': true,
   })
   const selectRef = useRef<HTMLButtonElement | null>(null)
   const [selectedAttendance, setSelectedAttendance] =
@@ -84,6 +86,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
     })
   const [query, setQuery] = useState('')
   const { session } = useCurrentSession()
+  const [kelasId, setKelasId] = useState<number | null>(null)
 
   const { toast } = useToast()
 
@@ -119,6 +122,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
     try {
       const result = await getDataByKelasId(id)
       setSiswa(result)
+      setKelasId(id)
 
       const defaultAttendance = result.map((item) => ({
         siswaId: item.id,
@@ -134,7 +138,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
         data: defaultAttendance,
       }))
 
-      const test = await cekAbsensiMultiJam(id, new Date(), [1, 2, 3])
+      const test = await cekAbsensiMultiJam(id, new Date(), [1, 2, 3, 4, 5])
       setAvail(test)
       //   console.log(test)
     } catch (error) {
@@ -174,7 +178,14 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
           title: 'Sukses',
           description: 'Data berhasil disimpan',
         })
+        const test = await cekAbsensiMultiJam(
+          kelasId!,
+          new Date(),
+          [1, 2, 3, 4, 5]
+        )
+        setAvail(test)
         setJamKe(undefined)
+        setSiswa([])
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
@@ -213,7 +224,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
   }, [siswa, query])
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto w-full p-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div>
           <Label>Asrama</Label>
@@ -271,6 +282,12 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
               </SelectItem>
               <SelectItem disabled={avail[3]} value="3">
                 3
+              </SelectItem>
+              <SelectItem disabled={avail[4]} value="4">
+                4
+              </SelectItem>
+              <SelectItem disabled={avail[5]} value="5">
+                5
               </SelectItem>
             </SelectContent>
           </Select>
@@ -360,7 +377,11 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
         </TableBody>
       </Table>
 
-      <Button onClick={handleConfirm}>Submit</Button>
+      <div className="mt-4 flex justify-end">
+        <Button className="ml-auto" onClick={handleConfirm}>
+          Simpan
+        </Button>
+      </div>
 
       <Dialog open={dialog} onOpenChange={setDialog}>
         <DialogContent>

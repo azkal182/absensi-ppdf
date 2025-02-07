@@ -57,14 +57,16 @@ export function NavMain({
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton asChild>
-            <Link href={'/users'}>
-              <UsersIcon />
-              <span>Users</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+        {role === 'ADMIN' && (
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href={'/users'}>
+                <UsersIcon />
+                <span>Users</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
       </SidebarMenu>
     </SidebarGroup>
   )

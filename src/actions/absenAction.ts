@@ -200,7 +200,7 @@ export async function cekAbsensiMultiJam(
   jamKeList: number[]
 ): Promise<Record<number, boolean>> {
   // Normalisasi tanggal agar hanya mempertimbangkan hari tanpa jam
-  const dateStart = new Date(tanggal)
+  const dateStart = fromZonedTime(tanggal, 'Asia/Jakarta')
   dateStart.setHours(0, 0, 0, 0)
 
   // Ambil semua data absensi berdasarkan kelas, tanggal, dan daftar jamKe
@@ -242,11 +242,29 @@ export async function getAsramaWithFullData() {
   return data
 }
 
+export type Absensi = {
+  asrama: string
+  totalDays: number
+  totalAbsensi: number
+  HADIR: number
+  SAKIT: number
+  IZIN: number
+  ALFA: number
+  percent: Percent
+}
+
+export type Percent = {
+  HADIR: string
+  SAKIT: string
+  IZIN: string
+  ALFA: string
+}
+
 export async function getDaftarAbsen(
   kelasId: number,
   year: number,
   month: number
-) {
+): Promise<Absensi[] | { error: string }> {
   try {
     // Create UTC start and end dates for the given month and year
     const startDate = new Date(Date.UTC(year, month - 1, 1)) // 1st day of the month in UTC
