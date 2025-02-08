@@ -1,3 +1,5 @@
+import InstallPrompt from '@/components/install-promp'
+import InstallPWA from '@/components/install-pwa'
 import { LoginForm } from '@/components/login-form'
 import React from 'react'
 
