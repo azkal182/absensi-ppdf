@@ -3,7 +3,7 @@
 import { SelectedAttendance } from '@/app/(protected)/absensi/tableData'
 import prisma from '@/lib/prisma'
 import { StatusAbsen } from '@prisma/client'
-import { fromZonedTime, toZonedTime } from 'date-fns-tz'
+import { format, fromZonedTime, toZonedTime } from 'date-fns-tz'
 
 // const TIMEZONE = process.env.NEXT_PUBLIC_TIMEZONE as string;
 
@@ -115,9 +115,13 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
       throw new Error('Data absensi tidak boleh kosong.')
     }
 
+    console.log(date)
+
     const tanggalAbsensi = new Date(date)
     tanggalAbsensi.setHours(0, 0, 0, 0)
-    const jakartaDate = new Date(date) // Get the current date
+    const jakartaDate = new Date(date)
+    console.log(jakartaDate)
+
     const jakartaDateWithTime = toZonedTime(jakartaDate, 'Asia/Jakarta') // Convert to Asia/Jakarta time
     jakartaDateWithTime.setHours(0, 0, 0, 0) // Set the time to 00:00
 
@@ -423,22 +427,87 @@ export async function getChartThisMonth() {
   }
 }
 
-export async function getDaftarAlfa(
-  asramaId: number,
-  year: number,
-  month: number
-) {
-  try {
-    const startDate = new Date(year, month - 1, 1)
-    const endDate = new Date(year, month, 0)
+// export async function getDaftarAlfa() {
+//     try {
+//         const today = toZonedTime(new Date(), 'Asia/Jakarta') // Convert to Asia/Jakarta time
+//         console.log(today);
 
+//         const date = format(today, "yyyy-MM-dd'T'17:00:00.000'Z'");
+//         console.log(date);
+
+//         const absensiAlfa = await prisma.absensi.findMany({
+//             where: {
+//                 date: '2025-02-07T17:00:00.000Z',
+//                 OR: [
+//                     { status: 'ALFA' },
+//                     {
+//                         JamAbsensi: {
+//                             some: { status: 'ALFA' },
+//                         },
+//                     },
+//                 ],
+//             },
+//             include: {
+//                 siswa: true,
+
+//                 JamAbsensi: {
+//                     select: {
+//                         jamKe: true,
+//                         status: true,
+//                         date: true,
+//                     },
+//                     orderBy: { jamKe: 'asc' },
+//                 },
+//             },
+//             orderBy: [{ siswaId: 'asc' }, { date: 'asc' }],
+//         })
+
+//         if (!absensiAlfa || absensiAlfa.length === 0) {
+//             return []
+//         }
+
+//         const siswaMap = new Map()
+
+//         absensiAlfa.forEach((absensi) => {
+//             const siswaId = absensi.siswa?.id ?? 0
+//             if (!siswaMap.has(siswaId)) {
+//                 siswaMap.set(siswaId, {
+//                     id: siswaId,
+//                     name: absensi.siswa?.name ?? 'Unknown',
+//                     alfa: [],
+//                 })
+//             }
+
+//             const formattedDate = new Date(absensi.date).toISOString().split('T')[0]
+//             const existingEntry = siswaMap
+//                 .get(siswaId)
+//                 .alfa.find((entry: any) => entry.date === formattedDate)
+
+//             if (existingEntry) {
+//                 existingEntry.jamKe.push(...absensi.JamAbsensi.map((jam) => jam.jamKe))
+//             } else {
+//                 siswaMap.get(siswaId).alfa.push({
+//                     date: formattedDate,
+//                     jamKe: absensi.JamAbsensi.map((jam) => jam.jamKe),
+//                     status: 'ALFA',
+//                 })
+//             }
+//         })
+
+//         return Array.from(siswaMap.values())
+//     } catch (error) {
+//         console.error('Error fetching absensi ALFA:', error)
+//         return { error: 'Terjadi kesalahan saat mengambil data absensi ALFA.' }
+//     }
+// }
+
+export async function getDaftarAlfa() {
+  try {
+    const today = toZonedTime(new Date(), 'Asia/Jakarta') // Convert to Asia/Jakarta time
+    today.setHours(0, 0, 0, 0)
     const absensiAlfa = await prisma.absensi.findMany({
       where: {
-        date: {
-          gte: startDate.toISOString(),
-          lte: endDate.toISOString(),
-        },
-        asramaId,
+        date: today,
         OR: [
           { status: 'ALFA' },
           {
@@ -450,6 +519,7 @@ export async function getDaftarAlfa(
       },
       include: {
         siswa: true,
+        asrama: true,
         JamAbsensi: {
           select: {
             jamKe: true,
@@ -459,43 +529,60 @@ export async function getDaftarAlfa(
           orderBy: { jamKe: 'asc' },
         },
       },
-      orderBy: [{ siswaId: 'asc' }, { date: 'asc' }],
+      orderBy: [{ asramaId: 'asc' }, { siswaId: 'asc' }, { date: 'asc' }],
     })
 
     if (!absensiAlfa || absensiAlfa.length === 0) {
       return []
     }
 
-    const siswaMap = new Map()
+    const asramaMap = new Map()
 
     absensiAlfa.forEach((absensi) => {
+      const asramaId = absensi.asrama?.id ?? 0
+      const asramaName = absensi.asrama?.name ?? 'Unknown'
+
+      if (!asramaMap.has(asramaId)) {
+        asramaMap.set(asramaId, {
+          id: asramaId,
+          name: asramaName,
+          jumlahAlfa: 0,
+          siswa: [],
+        })
+      }
+
+      const asramaData = asramaMap.get(asramaId)
+
       const siswaId = absensi.siswa?.id ?? 0
-      if (!siswaMap.has(siswaId)) {
-        siswaMap.set(siswaId, {
+      if (!asramaData.siswa.some((s: any) => s.id === siswaId)) {
+        asramaData.siswa.push({
           id: siswaId,
           name: absensi.siswa?.name ?? 'Unknown',
           alfa: [],
         })
       }
 
+      const siswaData = asramaData.siswa.find((s: any) => s.id === siswaId)
+
       const formattedDate = new Date(absensi.date).toISOString().split('T')[0]
-      const existingEntry = siswaMap
-        .get(siswaId)
-        .alfa.find((entry: any) => entry.date === formattedDate)
+      const existingEntry = siswaData.alfa.find(
+        (entry: any) => entry.date === formattedDate
+      )
 
       if (existingEntry) {
         existingEntry.jamKe.push(...absensi.JamAbsensi.map((jam) => jam.jamKe))
       } else {
-        siswaMap.get(siswaId).alfa.push({
+        siswaData.alfa.push({
           date: formattedDate,
           jamKe: absensi.JamAbsensi.map((jam) => jam.jamKe),
           status: 'ALFA',
         })
       }
-    })
-    console.log(JSON.stringify(Array.from(siswaMap.values()), null, 2))
 
-    return Array.from(siswaMap.values())
+      asramaData.jumlahAlfa += 1
+    })
+
+    return Array.from(asramaMap.values())
   } catch (error) {
     console.error('Error fetching absensi ALFA:', error)
     return { error: 'Terjadi kesalahan saat mengambil data absensi ALFA.' }
