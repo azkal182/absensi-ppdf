@@ -505,9 +505,11 @@ export async function getDaftarAlfa() {
   try {
     const today = toZonedTime(new Date(), 'Asia/Jakarta') // Convert to Asia/Jakarta time
     today.setHours(0, 0, 0, 0)
+    console.log(today.toISOString())
+
     const absensiAlfa = await prisma.absensi.findMany({
       where: {
-        date: today,
+        date: today.toISOString(),
         OR: [
           { status: 'ALFA' },
           {

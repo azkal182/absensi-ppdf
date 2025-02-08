@@ -74,9 +74,9 @@ export async function GET() {
     }
 
     try {
-      const response = await fetch(API_URL, requestOptions)
-      const responseData = await response.text()
-      console.log('WhatsApp API Response:', responseData)
+      await fetch(API_URL, requestOptions)
+      // const responseData = await response.text()
+      //   console.log('WhatsApp API Response:', responseData)
     } catch (whatsappError) {
       console.error('Failed to send WhatsApp message:', whatsappError)
     }
