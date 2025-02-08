@@ -108,9 +108,10 @@ export default function AbsensiTable() {
   }
 
   const handleChangeAsrama = async (asramaId: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const id = parseInt(asramaId)
     try {
-      const data = await getDaftarAlfa(id, 2025, 2)
+      const data = await getDaftarAlfa()
       console.log(data)
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment

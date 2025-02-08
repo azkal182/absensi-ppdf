@@ -3,7 +3,7 @@
 import { SelectedAttendance } from '@/app/(protected)/absensi/tableData'
 import prisma from '@/lib/prisma'
 import { StatusAbsen } from '@prisma/client'
-import { format, fromZonedTime, toZonedTime } from 'date-fns-tz'
+import { fromZonedTime, toZonedTime } from 'date-fns-tz'
 
 // const TIMEZONE = process.env.NEXT_PUBLIC_TIMEZONE as string;
 

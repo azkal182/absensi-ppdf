@@ -57,8 +57,8 @@ export async function GET() {
     })
 
     const payload = {
-      jid: '6287833372003@s.whatsapp.net',
-      type: 'number',
+      jid: '120363379009716100@g.us',
+      type: 'group',
       message: {
         text: messageText.trim(), // Hapus spasi atau newline berlebih
       },
