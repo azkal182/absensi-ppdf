@@ -19,7 +19,7 @@ export const getReportWhatsapp = async () => {
 export const getReportWhatsappById = async (id: string) => {
   try {
     const result = await prisma.reportWhatsapp.findUnique({
-      where: { id },
+      where: { id: parseInt(id) },
     })
     return result
   } catch (error) {
@@ -60,7 +60,7 @@ export const updateReportWhatsapp = async (
 ) => {
   try {
     const updatedReport = await prisma.reportWhatsapp.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data,
     })
     revalidatePath('/report-whatsapp')
@@ -76,7 +76,7 @@ export const updateReportWhatsapp = async (
 export const deleteReportWhatsapp = async (id: string) => {
   try {
     await prisma.reportWhatsapp.delete({
-      where: { id },
+      where: { id: parseInt(id) },
     })
     revalidatePath('/report-whatsapp')
 
