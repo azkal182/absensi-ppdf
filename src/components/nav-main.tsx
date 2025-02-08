@@ -8,6 +8,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import Link from 'next/link'
 
@@ -22,6 +23,8 @@ export function NavMain({
   }[]
   role: any
 }) {
+  const { setOpenMobile } = useSidebar()
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Absensi</SidebarGroupLabel>
@@ -29,7 +32,7 @@ export function NavMain({
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <Link href={item.url}>
+              <Link href={item.url} onClick={() => setOpenMobile(false)}>
                 <item.icon />
                 <span>{item.name}</span>
               </Link>
@@ -42,7 +45,7 @@ export function NavMain({
         {role === 'ADMIN' && (
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href={'/import'}>
+              <Link href={'/import'} onClick={() => setOpenMobile(false)}>
                 <Upload />
                 <span>Import</span>
               </Link>
@@ -51,7 +54,7 @@ export function NavMain({
         )}
         <SidebarMenuItem>
           <SidebarMenuButton asChild>
-            <Link href={'/data'}>
+            <Link href={'/data'} onClick={() => setOpenMobile(false)}>
               <BoxIcon />
               <span>Data</span>
             </Link>
@@ -60,7 +63,7 @@ export function NavMain({
         {role === 'ADMIN' && (
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href={'/users'}>
+              <Link href={'/users'} onClick={() => setOpenMobile(false)}>
                 <UsersIcon />
                 <span>Users</span>
               </Link>

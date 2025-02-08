@@ -66,6 +66,7 @@
 //     });
 
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -82,13 +83,39 @@ async function main() {
     prisma.user.deleteMany(),
   ])
 
-  await prisma.user.create({
-    data: {
-      username: 'admin',
-      name: 'Admin User',
-      password: '$2y$10$gT6y44XielkrktRPy0xQ.u143azgzz2Hrmv/ZbRsh6TVOzdW64kK2',
-      role: 'ADMIN',
-    },
+  await prisma.user.createMany({
+    data: [
+      {
+        username: 'admin',
+        name: 'Admin User',
+        password: bcrypt.hashSync('Azkal182'),
+        role: 'ADMIN',
+      },
+      {
+        username: 'pasca',
+        name: 'pasca User',
+        password: bcrypt.hashSync('pasca'),
+        role: 'ASRAMA',
+      },
+      {
+        username: 'illiyyin',
+        name: 'illiyyin User',
+        password: bcrypt.hashSync('illiyyin123'),
+        role: 'ASRAMA',
+      },
+      {
+        username: 'darussalam',
+        name: 'darussalam User',
+        password: bcrypt.hashSync('darussalam123'),
+        role: 'ASRAMA',
+      },
+      {
+        username: 'darulmusthofa',
+        name: 'darulmusthofa User',
+        password: bcrypt.hashSync('darulmusthofa123'),
+        role: 'ASRAMA',
+      },
+    ],
   })
 
   // List asrama dan kelas
