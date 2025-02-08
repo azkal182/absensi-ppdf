@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server'
 import { getDaftarAlfa } from '@/actions/absenAction'
 import { format, toZonedTime } from 'date-fns-tz'
 import { id } from 'date-fns/locale'
+import { getReportWhatsapp } from '@/actions/report_whatsapp'
 
-const API_URL = 'http://165.22.106.176:3030/absensi/messages/send'
+const API_URL = 'http://165.22.106.176:3030/absensi/messages/send/bulk'
 const API_KEY =
   'a24ebffc8739bfb85cebf8446605a0cd670012cbbc878af2a4e1af1ded72e578'
 const JAKARTA_TIMEZONE = 'Asia/Jakarta'
@@ -36,6 +37,9 @@ export async function GET() {
       return NextResponse.json({ error: 'No data available' }, { status: 404 })
     }
 
+    // get number whatsapp
+    const listJid = await getReportWhatsapp()
+
     // Ambil tanggal dari data pertama atau fallback ke tanggal hari ini di Jakarta
     const today = getTodayInJakarta()
     const formattedDate = formatDate(today)
@@ -56,13 +60,24 @@ export async function GET() {
       messageText += `\n` // Tambahkan baris kosong antar sekolah
     })
 
-    const payload = {
-      jid: '120363379009716100@g.us',
-      type: 'group',
-      message: {
-        text: messageText.trim(), // Hapus spasi atau newline berlebih
-      },
-    }
+    // const payload = {
+    //   jid: '120363379009716100@g.us',
+    //   type: 'group',
+    //   message: {
+    //     text: messageText.trim(), // Hapus spasi atau newline berlebih
+    //   },
+    // }
+
+    const payload = listJid.map((data) => {
+      return {
+        jid: data.jid,
+        type: data.type === 'GROUP' ? 'group' : 'number',
+        message: {
+          text: messageText.trim(), // Hapus spasi atau newline berlebih
+        },
+        delay: 3000,
+      }
+    })
 
     const requestOptions = {
       method: 'POST',
@@ -74,9 +89,9 @@ export async function GET() {
     }
 
     try {
-      await fetch(API_URL, requestOptions)
-      // const responseData = await response.text()
-      //   console.log('WhatsApp API Response:', responseData)
+      const response = await fetch(API_URL, requestOptions)
+      const responseData = await response.text()
+      console.log('WhatsApp API Response:', responseData)
     } catch (whatsappError) {
       console.error('Failed to send WhatsApp message:', whatsappError)
     }

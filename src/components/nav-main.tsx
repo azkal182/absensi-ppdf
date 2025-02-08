@@ -1,6 +1,12 @@
 'use client'
 
-import { BoxIcon, Upload, UsersIcon, type LucideIcon } from 'lucide-react'
+import {
+  BoxIcon,
+  ReceiptPoundSterlingIcon,
+  Upload,
+  UsersIcon,
+  type LucideIcon,
+} from 'lucide-react'
 
 import {
   SidebarGroup,
@@ -66,6 +72,19 @@ export function NavMain({
               <Link href={'/users'} onClick={() => setOpenMobile(false)}>
                 <UsersIcon />
                 <span>Users</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
+        {role === 'ADMIN' && (
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link
+                href={'/report-whatsapp'}
+                onClick={() => setOpenMobile(false)}
+              >
+                <ReceiptPoundSterlingIcon />
+                <span>Laporan Whatsapp</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

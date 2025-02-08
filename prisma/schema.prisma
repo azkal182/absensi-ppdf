@@ -104,3 +104,18 @@ model JamAbsensi {
     @@index([jamKe])
     @@map("jam_absensi")
 }
+
+model ReportWhatsapp {
+    id     Int                @id @default(autoincrement())
+    name   String
+    jid    String
+    type   TypeReportWhatsapp
+    active Boolean            @default(false)
+
+    @@map("report_whatsapp")
+}
+
+enum TypeReportWhatsapp {
+    GROUP
+    PERSONAL
+}
