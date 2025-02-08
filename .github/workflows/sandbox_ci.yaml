@@ -8,6 +8,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: bnza
+      SENTRY_PROJECT: javascript-nextjs
+      SENTRY_DEPLOY_ENVIRONMENT: production
 
     steps:
       - name: Checkout code
@@ -41,6 +46,20 @@ jobs:
           NEXTAUTH_URL: 'https://absensi.amtsilatipusat.com'
           AUTH_TRUST_HOST: 'https://absensi.amtsilatipusat.com'
         run: pnpm build
+
+      - name: Create Sentry Release
+        run: |
+          # Install Sentry CLI
+          curl -sL https://sentry.io/get-cli/ | bash
+
+          # Create new Sentry release
+          export SENTRY_RELEASE=$(sentry-cli releases propose-version)
+          sentry-cli releases new -p $SENTRY_PROJECT $SENTRY_RELEASE
+          sentry-cli releases set-commits --auto $SENTRY_RELEASE
+          sentry-cli releases finalize $SENTRY_RELEASE
+
+          # Create new deploy for this Sentry release
+          sentry-cli releases deploys $SENTRY_RELEASE new -e $SENTRY_DEPLOY_ENVIRONMENT
 
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.9.0
