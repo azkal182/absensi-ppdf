@@ -503,13 +503,20 @@ export async function getChartThisMonth() {
 
 export async function getDaftarAlfa() {
   try {
-    const today = toZonedTime(new Date(), 'Asia/Jakarta') // Convert to Asia/Jakarta time
-    today.setHours(0, 0, 0, 0)
-    console.log(today.toISOString())
+    // Ambil waktu saat ini dan ubah ke zona Asia/Jakarta
+    const todayJakarta = toZonedTime(new Date(), 'Asia/Jakarta')
+
+    // Set jam ke 00:00 di zona Jakarta
+    todayJakarta.setHours(0, 0, 0, 0)
+
+    // Konversi kembali ke UTC
+    const todayUtc = fromZonedTime(todayJakarta, 'Asia/Jakarta')
+
+    console.log(todayUtc.toISOString()) // Harus menunjukkan 17:00 UTC sehari sebelumnya
 
     const absensiAlfa = await prisma.absensi.findMany({
       where: {
-        date: today.toISOString(),
+        date: todayUtc.toISOString(),
         OR: [
           { status: 'ALFA' },
           {
