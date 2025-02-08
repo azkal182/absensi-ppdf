@@ -3,6 +3,7 @@ import TableData from './tableData'
 import { Card } from '@/components/ui/card'
 import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
+import { toZonedTime } from 'date-fns-tz'
 
 export const dynamic = 'force-dynamic'
 // const dynamic = 'force-dynamic'
@@ -10,7 +11,8 @@ export const dynamic = 'force-dynamic'
 export default async function Home() {
   const data = await getAsrama()
 
-  const today = new Date().toLocaleDateString()
+  const timeZone = 'Asia/Jakarta'
+  const today = toZonedTime(new Date(), timeZone)
 
   return (
     <div>
