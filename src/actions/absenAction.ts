@@ -512,8 +512,6 @@ export async function getDaftarAlfa() {
     // Konversi kembali ke UTC
     const todayUtc = fromZonedTime(todayJakarta, 'Asia/Jakarta')
 
-    console.log(todayUtc.toISOString()) // Harus menunjukkan 17:00 UTC sehari sebelumnya
-
     const absensiAlfa = await prisma.absensi.findMany({
       where: {
         date: todayUtc.toISOString(),
@@ -540,6 +538,8 @@ export async function getDaftarAlfa() {
       },
       orderBy: [{ asramaId: 'asc' }, { siswaId: 'asc' }, { date: 'asc' }],
     })
+
+    // console.log(JSON.stringify(absensiAlfa, null, 2));
 
     if (!absensiAlfa || absensiAlfa.length === 0) {
       return []
@@ -578,12 +578,17 @@ export async function getDaftarAlfa() {
         (entry: any) => entry.date === formattedDate
       )
 
+      const jamAbsensiAlfa = absensi.JamAbsensi.filter(
+        (jam) => jam.status === 'ALFA'
+      ) // Ambil yang statusnya 'ALFA'
+        .map((jam) => jam.jamKe) // Ambil nilai jamKe
+
       if (existingEntry) {
         existingEntry.jamKe.push(...absensi.JamAbsensi.map((jam) => jam.jamKe))
       } else {
         siswaData.alfa.push({
           date: formattedDate,
-          jamKe: absensi.JamAbsensi.map((jam) => jam.jamKe),
+          jamKe: jamAbsensiAlfa,
           status: 'ALFA',
         })
       }

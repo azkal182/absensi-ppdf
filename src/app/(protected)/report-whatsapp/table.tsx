@@ -41,6 +41,8 @@ import {
 import {
   createReportWhatsapp,
   deleteReportWhatsapp,
+  sendAbsensiReport,
+  sendAbsensiReportById,
   updateReportWhatsapp,
 } from '@/actions/report_whatsapp'
 import {
@@ -53,13 +55,34 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { toast } from '@/hooks/use-toast'
 
-const schema = z.object({
-  name: z.string().min(1, 'Nama wajib diisi'),
-  jid: z.string().min(1, 'JID wajib diisi'),
-  type: z.enum(['GROUP', 'PERSONAL']),
-  active: z.boolean().optional(),
-})
+const schema = z
+  .object({
+    name: z.string().min(1, 'Nama wajib diisi'),
+    jid: z.string().optional(),
+    telegramId: z.string().optional(),
+    type: z.enum(['GROUP', 'PERSONAL']),
+    active: z.boolean().default(false),
+    whatsapp: z.boolean().default(false),
+    telegram: z.boolean().default(false),
+  })
+  .refine((data) => !(data.whatsapp && !data.jid), {
+    message: 'JID wajib diisi jika WhatsApp diaktifkan',
+    path: ['jid'],
+  })
+  .refine((data) => !(data.telegram && !data.telegramId), {
+    message: 'Telegram ID wajib diisi jika Telegram diaktifkan',
+    path: ['telegramId'],
+  })
+  .refine((data) => data.jid || data.telegramId, {
+    message: 'Salah satu dari JID atau Telegram ID harus diisi',
+    path: ['jid'], // Bisa juga di path ['telegramId'], tergantung di mana ingin menampilkan error
+  })
+  .refine((data) => data.jid || data.telegramId, {
+    message: 'Salah satu dari JID atau Telegram ID harus diisi',
+    path: ['telegramId'],
+  })
 
 type FormData = z.infer<typeof schema>
 
@@ -75,9 +98,10 @@ const TableReport = ({ data }: { data: any }) => {
     defaultValues: {
       // Tambahkan default values
       name: '',
-      jid: '',
       type: 'GROUP',
       active: true,
+      whatsapp: false,
+      telegram: false,
     },
   })
 
@@ -128,6 +152,38 @@ const TableReport = ({ data }: { data: any }) => {
     handleCloseModal()
   }
 
+  const sentReport = async (id: number) => {
+    try {
+      await sendAbsensiReportById(id)
+      toast({
+        title: 'Sukses',
+        description: 'Data berhasil dikirim',
+      })
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Gagal',
+        description: error,
+      })
+    }
+  }
+
+  const sentAllReport = async () => {
+    try {
+      await sendAbsensiReport()
+      toast({
+        title: 'Sukses',
+        description: 'Data berhasil dikirim',
+      })
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Gagal',
+        description: error,
+      })
+    }
+  }
+
   return (
     <div>
       <Card>
@@ -135,7 +191,10 @@ const TableReport = ({ data }: { data: any }) => {
           <CardTitle>Report Whatsapp</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex justify-end">
+          <div className="mb-4 flex justify-end space-x-4">
+            <Button variant={'secondary'} onClick={() => sentAllReport()}>
+              Kirim Laporan
+            </Button>
             <Button onClick={() => handleOpenModal()}>Add</Button>
           </div>
           <Table>
@@ -146,7 +205,9 @@ const TableReport = ({ data }: { data: any }) => {
                 <TableHead>NAMA</TableHead>
                 <TableHead>TIPE</TableHead>
                 <TableHead>JID</TableHead>
-                <TableHead>STATUS</TableHead>
+                <TableHead>TELEGRAM_ID</TableHead>
+                <TableHead>WHATSAPP</TableHead>
+                <TableHead>TELEGRAM</TableHead>
                 <TableHead>ACTIONS</TableHead>
               </TableRow>
             </TableHeader>
@@ -157,7 +218,29 @@ const TableReport = ({ data }: { data: any }) => {
                   <TableCell>{item.name}</TableCell>
                   <TableCell>{item.type}</TableCell>
                   <TableCell>{item.jid}</TableCell>
-                  <TableCell>{item.active ? 'Aktif' : 'Tidak'}</TableCell>
+                  <TableCell>{item.telegramId}</TableCell>
+                  <TableCell>
+                    {item.whatsapp ? (
+                      <span className="rounded-full bg-green-500 px-1.5 py-1 text-xs text-white">
+                        aktif
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-destructive px-1.5 py-1 text-xs text-white">
+                        tidak
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {item.telegram ? (
+                      <span className="rounded-full bg-green-500 px-1.5 py-1 text-xs text-white">
+                        aktif
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-destructive px-1.5 py-1 text-xs text-white">
+                        tidak
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell className="space-x-2">
                     <Button size="sm" onClick={() => handleOpenModal(item)}>
                       Edit
@@ -168,6 +251,14 @@ const TableReport = ({ data }: { data: any }) => {
                       onClick={() => handleDeleteConfirmation(item.id)}
                     >
                       Delete
+                    </Button>
+                    <Button
+                      disabled={!(item.whatsapp || item.telegram)}
+                      size="sm"
+                      variant="outline"
+                      onClick={() => sentReport(item.id)}
+                    >
+                      Kirim
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -205,13 +296,34 @@ const TableReport = ({ data }: { data: any }) => {
                   <FormItem>
                     <FormLabel>JID</FormLabel>
                     <FormControl>
-                      <Input placeholder="JID" {...field} />
+                      <Input
+                        value={field.value ?? ''}
+                        placeholder="JID"
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="telegramId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telegram ID</FormLabel>
+                    <FormControl>
+                      <Input
+                        value={field.value ?? ''}
+                        placeholder="Telegram id"
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="type"
@@ -237,6 +349,59 @@ const TableReport = ({ data }: { data: any }) => {
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="whatsapp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Whatsapp</FormLabel>
+                    <Select
+                      onValueChange={(value) =>
+                        field.onChange(value === 'true')
+                      }
+                      defaultValue={field.value ? 'true' : 'false'}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih Status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Aktif</SelectItem>
+                        <SelectItem value="false">Tidak</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="telegram"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telegram</FormLabel>
+                    <Select
+                      onValueChange={(value) =>
+                        field.onChange(value === 'true')
+                      }
+                      defaultValue={field.value ? 'true' : 'false'}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih Status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="true">Aktif</SelectItem>
+                        <SelectItem value="false">Tidak</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <DialogFooter className="mt-4">
                 <Button
                   size={'sm'}

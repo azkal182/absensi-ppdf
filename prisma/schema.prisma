@@ -106,11 +106,14 @@ model JamAbsensi {
 }
 
 model ReportWhatsapp {
-    id     Int                @id @default(autoincrement())
-    name   String
-    jid    String
-    type   TypeReportWhatsapp
-    active Boolean            @default(false)
+    id         Int                @id @default(autoincrement())
+    name       String
+    jid        String
+    telegramId String?
+    type       TypeReportWhatsapp
+    active     Boolean            @default(false)
+    whatsapp   Boolean            @default(false)
+    telegram   Boolean            @default(false)
 
     @@map("report_whatsapp")
 }
