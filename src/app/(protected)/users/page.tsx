@@ -1,13 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { User } from '@prisma/client'
 import {
   getUsers,
   createUser,
   updateUser,
   deleteUser,
   changePassword,
+  UserWithRolesAndAsramas,
 } from '@/actions/user'
 import UsersTable from '@/components/user/UsersTable'
 import CreateUserModal from '@/components/user/CreateUserModal'
@@ -16,8 +16,9 @@ import ChangePasswordModal from '@/components/user/ChangePasswordModal'
 import DeleteConfirmationModal from '@/components/user/DeleteConfirmationModal'
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([])
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [users, setUsers] = useState<UserWithRolesAndAsramas[]>([])
+  const [selectedUser, setSelectedUser] =
+    useState<UserWithRolesAndAsramas | null>(null)
   const [modalState, setModalState] = useState({
     create: false,
     edit: false,
@@ -61,7 +62,10 @@ export default function UsersPage() {
     await loadUsers()
   }
 
-  const openModal = (type: keyof typeof modalState, user?: User) => {
+  const openModal = (
+    type: keyof typeof modalState,
+    user?: UserWithRolesAndAsramas
+  ) => {
     if (user) setSelectedUser(user)
     setModalState((prev) => ({ ...prev, [type]: true }))
   }

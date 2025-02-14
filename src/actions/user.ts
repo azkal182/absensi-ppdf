@@ -1,11 +1,40 @@
 'use server'
 import prisma from '@/lib/prisma'
 import { userSchema, type UserSchema } from '@/schemas/userSchema'
+import { Asrama, Role, User, UserAsrama, UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
-export const getUsers = async () => {
-  const results = await prisma.user.findMany()
-  return results
+export type UserWithRolesAndAsramas = {
+  id: number
+  name: string
+  username: string
+  role: any
+  roles: string[]
+  asramas: string[]
+}
+
+export type UserWithRelations = User & {
+  roles: (UserRole & { role: Role })[]
+  UserAsrama: (UserAsrama & { asrama: Asrama })[]
+}
+
+export const getUsers = async (): Promise<UserWithRolesAndAsramas[]> => {
+  const users = await prisma.user.findMany({
+    include: {
+      roles: { include: { role: true } },
+      UserAsrama: { include: { asrama: true } },
+    },
+  })
+  const formattedUsers: UserWithRolesAndAsramas[] = users.map((user) => ({
+    id: user.id,
+    name: user.name,
+    username: user.username,
+    role: user.role,
+    roles: user.roles.map((r) => r.role.name),
+    asramas: user.UserAsrama.map((g) => g.asrama.name),
+  }))
+
+  return formattedUsers
 }
 
 export const createUser = async (data: UserSchema) => {
@@ -64,4 +93,28 @@ export const deleteUser = async (id: number) => {
     console.log(error)
     return { error: 'error deleting user' }
   }
+}
+
+export const testUsers = async () => {
+  const users = await prisma.user.findMany({
+    include: {
+      roles: { include: { role: true } },
+      UserAsrama: { include: { asrama: true } },
+    },
+  })
+  const formattedUsers = users.map((user) => ({
+    id: user.id,
+    name: user.name,
+    usename: user.username,
+    role: user.role,
+    roles: user.roles.map((r) => r.role.name),
+    asramas: user.UserAsrama.map((g) => g.asrama.name),
+  }))
+
+  return formattedUsers
+}
+
+export const getRoles = async () => {
+  const roles = await prisma.role.findMany()
+  return roles
 }

@@ -26,6 +26,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useEffect, useState } from 'react'
+import { Asrama, Role } from '@prisma/client'
+import { getRoles } from '@/actions/user'
+import { getAsrama } from '@/actions/absenAction'
 
 export default function CreateUserModal({
   open,
@@ -36,6 +40,10 @@ export default function CreateUserModal({
   onOpenChange: (open: boolean) => void
   onSubmit: (data: UserSchema) => void
 }) {
+  const [userRoles, setUserRoles] = useState<Role[]>()
+  const [asramas, setAsramas] = useState<Asrama[]>()
+  const [selectRole, setSelectRole] = useState('')
+
   const form = useForm<UserSchema>({
     resolver: zodResolver(userSchema),
     defaultValues: {
@@ -45,6 +53,20 @@ export default function CreateUserModal({
       role: 'USER',
     },
   })
+
+  const fetchUserRoles = async () => {
+    const result = await getRoles()
+    setUserRoles(result)
+  }
+
+  const fetchAsrama = async () => {
+    const result = await getAsrama()
+    setAsramas(result)
+  }
+  useEffect(() => {
+    fetchUserRoles()
+    fetchAsrama()
+  }, [])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -98,23 +120,31 @@ export default function CreateUserModal({
 
             <FormField
               control={form.control}
-              name="role"
+              name="roleId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Role</FormLabel>
+                  <FormLabel>Role User</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    onValueChange={(val) => {
+                      const role = userRoles?.find(
+                        (a) => a.id === parseInt(val)
+                      )
+                      setSelectRole(role?.name as string)
+                      field.onChange(Number(val))
+                    }}
+                    defaultValue={field.value ? field.value.toString() : ''}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Pilih role" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="USER">User</SelectItem>
-                      <SelectItem value="ADMIN">Admin</SelectItem>
-                      <SelectItem value="ASRAMA">Asrama</SelectItem>
+                      {userRoles?.map((role) => (
+                        <SelectItem key={role.id} value={role.id.toString()}>
+                          {role.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -122,6 +152,38 @@ export default function CreateUserModal({
               )}
             />
 
+            {selectRole && !['ADMIN', 'USER'].includes(selectRole) && (
+              <FormField
+                control={form.control}
+                name="asramaId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Asrama</FormLabel>
+                    <Select
+                      onValueChange={(val) => field.onChange(Number(val))}
+                      defaultValue={field.value ? field.value.toString() : ''}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {asramas?.map((asrama) => (
+                          <SelectItem
+                            key={asrama.id}
+                            value={asrama.id.toString()}
+                          >
+                            {asrama.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <div className="flex justify-end gap-2">
               <Button
                 type="button"

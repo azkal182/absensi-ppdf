@@ -1,16 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getAsramaWithFullData } from '@/actions/absenAction'
 
@@ -23,14 +14,31 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import TableSantri from '@/components/santri/TableSantri'
+// import { usePathname, useSearchParams } from 'next/navigation'
+// import Link from 'next/link'
 
 const DataPage = () => {
   const [asrama, setAsrama] = useState<any>([])
+  //   const searchParams = useSearchParams()
+  //   const pathname = usePathname()
+  //   const page = searchParams.get('page')
+  //   console.log(page)
+
+  //   const createQueryString = useCallback(
+  //     (name: string, value: string) => {
+  //       const params = new URLSearchParams(searchParams.toString())
+  //       console.log({ params })
+
+  //       params.set(name, value)
+  //       return params.toString()
+  //     },
+  //     [searchParams]
+  //   )
 
   useEffect(() => {
     const fetchAsrama = async () => {
       const data = await getAsramaWithFullData()
-
       setAsrama(data)
     }
 
@@ -38,10 +46,11 @@ const DataPage = () => {
   }, [])
   return (
     <div>
+      {/* <Link href={pathname + '?' + createQueryString('test', '4')}>test</Link> */}
       <Tabs defaultValue="asrama" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="asrama">Asrama</TabsTrigger>
-          <TabsTrigger value="kelas">Kelas</TabsTrigger>
+          {/* <TabsTrigger value="kelas">Kelas</TabsTrigger> */}
           <TabsTrigger value="santri">Santri</TabsTrigger>
         </TabsList>
         <TabsContent value="asrama">
@@ -110,7 +119,7 @@ const DataPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="kelas">
+        {/* <TabsContent value="kelas">
           <Card>
             <CardHeader>
               <CardTitle>Password</CardTitle>
@@ -132,29 +141,9 @@ const DataPage = () => {
               <Button>Save password</Button>
             </CardFooter>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
         <TabsContent value="santri">
-          <Card>
-            <CardHeader>
-              <CardTitle>Santri</CardTitle>
-              <CardDescription>
-                Change your password here. After saving, youll be logged out.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="space-y-1">
-                <Label htmlFor="current">Current password</Label>
-                <Input id="current" type="password" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="new">New password</Label>
-                <Input id="new" type="password" />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>Save password</Button>
-            </CardFooter>
-          </Card>
+          <TableSantri />
         </TabsContent>
       </Tabs>
     </div>

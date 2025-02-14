@@ -588,62 +588,64 @@ export default function AbsensiTable() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div>
-          <Label>Asrama</Label>
-          <Select onValueChange={handleChangeAsrama}>
-            <SelectTrigger className="w-full md:w-[300px]">
-              <SelectValue placeholder="Pilih Asrama" />
-            </SelectTrigger>
-            <SelectContent>
-              {asrama.map(({ id, name }) => (
-                <SelectItem key={id} value={id.toString()}>
-                  {name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <Card className="p-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div>
+            <Label>Asrama</Label>
+            <Select onValueChange={handleChangeAsrama}>
+              <SelectTrigger className="w-full md:w-[300px]">
+                <SelectValue placeholder="Pilih Asrama" />
+              </SelectTrigger>
+              <SelectContent>
+                {asrama.map(({ id, name }) => (
+                  <SelectItem key={id} value={id.toString()}>
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div>
-          <Label>Kelas</Label>
-          <Select
-            onValueChange={handleChangeKelas}
-            disabled={!selectedAsrama}
-            value={selectedKelas?.toString() ?? ''}
-          >
-            <SelectTrigger className="w-full md:w-[300px]">
-              <SelectValue placeholder="Pilih Kelas" />
-            </SelectTrigger>
-            <SelectContent>
-              {kelas.map(({ id, name, teacher }) => (
-                <SelectItem key={id} value={id.toString()}>
-                  {name} - {teacher}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          <div>
+            <Label>Kelas</Label>
+            <Select
+              onValueChange={handleChangeKelas}
+              disabled={!selectedAsrama}
+              value={selectedKelas?.toString() ?? ''}
+            >
+              <SelectTrigger className="w-full md:w-[300px]">
+                <SelectValue placeholder="Pilih Kelas" />
+              </SelectTrigger>
+              <SelectContent>
+                {kelas.map(({ id, name, teacher }) => (
+                  <SelectItem key={id} value={id.toString()}>
+                    {name} - {teacher}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div>
-          <Label>Bulan & Tahun</Label>
-          <Select
-            value={selectedMonthYear}
-            onValueChange={setSelectedMonthYear}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Pilih Bulan & Tahun" />
-            </SelectTrigger>
-            <SelectContent>
-              {monthYearOptions.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div>
+            <Label>Bulan & Tahun</Label>
+            <Select
+              value={selectedMonthYear}
+              onValueChange={setSelectedMonthYear}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Pilih Bulan & Tahun" />
+              </SelectTrigger>
+              <SelectContent>
+                {monthYearOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
+      </Card>
 
       {absensi.length > 0 &&
         weeks.map(({ week, days }) => (

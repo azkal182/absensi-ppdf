@@ -339,6 +339,157 @@ export async function getDaftarAbsen(
   }
 }
 
+export async function getDaftarAbsenTodayByKelasId(
+  kelasId: number
+): Promise<Absensi[] | { error: string }> {
+  try {
+    const todayJakarta = toZonedTime(new Date(), 'Asia/Jakarta')
+
+    // Set jam ke 00:00 di zona Jakarta
+    todayJakarta.setHours(0, 0, 0, 0)
+
+    // Konversi kembali ke UTC
+    const todayUtc = fromZonedTime(todayJakarta, 'Asia/Jakarta')
+
+    console.log(todayUtc)
+
+    const absensiList = await prisma.absensi.findMany({
+      where: {
+        date: todayUtc.toISOString(),
+        siswa: {
+          kelasId,
+        },
+      },
+      include: {
+        siswa: true,
+        JamAbsensi: {
+          select: {
+            jamKe: true,
+            status: true,
+          },
+          orderBy: { jamKe: 'asc' },
+        },
+      },
+      orderBy: [{ siswaId: 'asc' }, { date: 'asc' }],
+    })
+
+    if (!absensiList || absensiList.length === 0) {
+      console.log('no data')
+
+      return [] // Return empty array if no data is found
+    }
+
+    // Structure the data for easier processing
+    const siswaMap = new Map()
+
+    absensiList.forEach((absensi) => {
+      const siswaId = absensi.siswa?.id ?? 0 // Ensure siswa exists
+      if (!siswaMap.has(siswaId)) {
+        siswaMap.set(siswaId, {
+          id: siswaId,
+          name: absensi.siswa?.name ?? 'Unknown',
+          data: [],
+        })
+      }
+
+      // Add all available jamKe for this date
+      absensi.JamAbsensi.forEach((jam) => {
+        siswaMap.get(siswaId).data.push({
+          jamKe: jam.jamKe,
+          status: jam.status,
+        })
+      })
+    })
+
+    return Array.from(siswaMap.values())
+  } catch (error) {
+    console.error('Error fetching absensi:', error)
+    return { error: 'Terjadi kesalahan saat mengambil data absensi.' }
+  }
+}
+
+export async function getDaftarAbsenByJamKe(
+  kelasId: number,
+  date: Date,
+  jamKe: number
+): Promise<Absensi[] | { error: string }> {
+  try {
+    const todayJakarta = toZonedTime(date, 'Asia/Jakarta')
+
+    // Set jam ke 00:00 di zona Jakarta
+    todayJakarta.setHours(0, 0, 0, 0)
+
+    // Konversi kembali ke UTC
+    const todayUtc = fromZonedTime(todayJakarta, 'Asia/Jakarta')
+
+    const absensiList = await prisma.absensi.findMany({
+      where: {
+        date: todayUtc.toISOString(),
+        siswa: {
+          kelasId,
+        },
+        JamAbsensi: {
+          some: {
+            jamKe,
+          },
+        },
+      },
+      include: {
+        siswa: true,
+        JamAbsensi: {
+          where: { jamKe },
+          select: {
+            jamKe: true,
+            status: true,
+          },
+          orderBy: { jamKe: 'asc' },
+        },
+      },
+      orderBy: [{ siswaId: 'asc' }, { date: 'asc' }],
+    })
+
+    if (!absensiList || absensiList.length === 0) {
+      return []
+    }
+
+    const siswaMap = new Map()
+
+    absensiList.forEach((absensi) => {
+      const siswaId = absensi.siswa?.id ?? 0
+      if (!siswaMap.has(siswaId)) {
+        siswaMap.set(siswaId, {
+          id: siswaId,
+          name: absensi.siswa?.name ?? 'Unknown',
+          status: absensi.JamAbsensi[0].status,
+          // absensi: {},
+        })
+      }
+
+      // const jakartaDate = toZonedTime(absensi.date, 'Asia/Jakarta');
+      // const formattedDate = new Date(jakartaDate).getDate();
+
+      // if (!siswaMap.get(siswaId).absensi[formattedDate]) {
+      //     siswaMap.get(siswaId).absensi[formattedDate] = [];
+      // }
+
+      // absensi.JamAbsensi.forEach((jam) => {
+      //     siswaMap.get(siswaId).absensi[formattedDate].push({
+      //         jamKe: jam.jamKe,
+      //         status: jam.status,
+      //     });
+      // });
+    })
+    console.log(JSON.stringify(Array.from(siswaMap.values()), null, 2))
+
+    return Array.from(siswaMap.values())
+  } catch (error) {
+    console.error('Error fetching absensi by jamKe:', error)
+    return {
+      error: 'Terjadi kesalahan saat mengambil data absensi berdasarkan jamKe.',
+    }
+  }
+}
+
 export const getKelasById = async (kelasId: number) => {
   try {
     const result = await prisma.kelas.findUnique({ where: { id: kelasId } })
@@ -527,6 +678,7 @@ export async function getDaftarAlfa() {
       include: {
         siswa: true,
         asrama: true,
+        kelas: true,
         JamAbsensi: {
           select: {
             jamKe: true,
@@ -539,8 +691,6 @@ export async function getDaftarAlfa() {
       orderBy: [{ asramaId: 'asc' }, { siswaId: 'asc' }, { date: 'asc' }],
     })
 
-    // console.log(JSON.stringify(absensiAlfa, null, 2));
-
     if (!absensiAlfa || absensiAlfa.length === 0) {
       return []
     }
@@ -550,28 +700,42 @@ export async function getDaftarAlfa() {
     absensiAlfa.forEach((absensi) => {
       const asramaId = absensi.asrama?.id ?? 0
       const asramaName = absensi.asrama?.name ?? 'Unknown'
+      const kelasId = absensi.kelas?.id ?? 0
+      const kelasName = absensi.kelas?.name ?? 'Unknown'
+      const teacherName = absensi.kelas?.teacher ?? 'Unknown'
 
       if (!asramaMap.has(asramaId)) {
         asramaMap.set(asramaId, {
           id: asramaId,
           name: asramaName,
           jumlahAlfa: 0,
-          siswa: [],
+          kelas: new Map(),
         })
       }
 
       const asramaData = asramaMap.get(asramaId)
 
+      if (!asramaData.kelas.has(kelasId)) {
+        asramaData.kelas.set(kelasId, {
+          id: kelasId,
+          name: kelasName,
+          teacher: teacherName,
+          siswa: [],
+        })
+      }
+
+      const kelasData = asramaData.kelas.get(kelasId)
+
       const siswaId = absensi.siswa?.id ?? 0
-      if (!asramaData.siswa.some((s: any) => s.id === siswaId)) {
-        asramaData.siswa.push({
+      if (!kelasData.siswa.some((s: any) => s.id === siswaId)) {
+        kelasData.siswa.push({
           id: siswaId,
           name: absensi.siswa?.name ?? 'Unknown',
           alfa: [],
         })
       }
 
-      const siswaData = asramaData.siswa.find((s: any) => s.id === siswaId)
+      const siswaData = kelasData.siswa.find((s: any) => s.id === siswaId)
 
       const formattedDate = new Date(absensi.date).toISOString().split('T')[0]
       const existingEntry = siswaData.alfa.find(
@@ -580,11 +744,10 @@ export async function getDaftarAlfa() {
 
       const jamAbsensiAlfa = absensi.JamAbsensi.filter(
         (jam) => jam.status === 'ALFA'
-      ) // Ambil yang statusnya 'ALFA'
-        .map((jam) => jam.jamKe) // Ambil nilai jamKe
+      ).map((jam) => jam.jamKe)
 
       if (existingEntry) {
-        existingEntry.jamKe.push(...absensi.JamAbsensi.map((jam) => jam.jamKe))
+        existingEntry.jamKe.push(...jamAbsensiAlfa)
       } else {
         siswaData.alfa.push({
           date: formattedDate,
@@ -596,7 +759,13 @@ export async function getDaftarAlfa() {
       asramaData.jumlahAlfa += 1
     })
 
-    return Array.from(asramaMap.values())
+    // Konversi Map ke Array
+    const result = Array.from(asramaMap.values()).map((asrama) => ({
+      ...asrama,
+      kelas: Array.from(asrama.kelas.values()),
+    }))
+
+    return result
   } catch (error) {
     console.error('Error fetching absensi ALFA:', error)
     return { error: 'Terjadi kesalahan saat mengambil data absensi ALFA.' }

@@ -3,6 +3,7 @@
 import {
   BoxIcon,
   ReceiptPoundSterlingIcon,
+  SearchCheck,
   Upload,
   UsersIcon,
   type LucideIcon,
@@ -48,6 +49,19 @@ export function NavMain({
       </SidebarMenu>
       <SidebarGroupLabel>Master</SidebarGroupLabel>
       <SidebarMenu>
+        {role === 'ADMIN' && (
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link
+                href={'/validasi-absen'}
+                onClick={() => setOpenMobile(false)}
+              >
+                <SearchCheck />
+                <span>Validaasi Absen</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
         {role === 'ADMIN' && (
           <SidebarMenuItem>
             <SidebarMenuButton asChild>

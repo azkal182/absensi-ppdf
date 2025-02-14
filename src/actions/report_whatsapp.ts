@@ -145,11 +145,56 @@ export async function sendTelegramMessages(payloads: any[]) {
 }
 
 // 🔹 Membuat pesan laporan berdasarkan daftar alfa
+// export async function generateReportMessage(): Promise<{
+//   message: string
+//   data: any[]
+// }> {
+//   const result: any[] | { error: string } = await getDaftarAlfa()
+
+//   if ('error' in result || !Array.isArray(result) || result.length === 0) {
+//     throw new Error('Data tidak tersedia atau terjadi kesalahan.')
+//   }
+
+//   const today = getTodayInJakarta()
+//   const formattedDate = formatDate(today)
+
+//   let messageText = `📋 *Laporan Absensi PPDF*\n📅 ${formattedDate}\n\n`
+
+//   result.forEach(({ name, siswa, jumlahAlfa }) => {
+//     messageText += `🏫 *${name} - ${jumlahAlfa} santri*\n`
+//     siswa.forEach((student: any, index: number) => {
+//       const jamKeList = student.alfa
+//         .map((a: any) => a.jamKe.join(', '))
+//         .join('; ')
+//       messageText += `${index + 1}. ${student.name} (Jam ke: ${jamKeList})\n`
+//     })
+//     messageText += `\n`
+//   })
+
+//   return { message: messageText.trim(), data: result }
+// }
+
+interface Student {
+  name: string
+  alfa: { jamKe: number[] }[]
+}
+
+interface Kelas {
+  name: string
+  teacher: string
+  siswa: Student[]
+}
+
+interface Asrama {
+  name: string
+  jumlahAlfa: number
+  kelas: Kelas[]
+}
 export async function generateReportMessage(): Promise<{
   message: string
-  data: any[]
+  data: Asrama[]
 }> {
-  const result: any[] | { error: string } = await getDaftarAlfa()
+  const result: Asrama[] | { error: string } = await getDaftarAlfa()
 
   if ('error' in result || !Array.isArray(result) || result.length === 0) {
     throw new Error('Data tidak tersedia atau terjadi kesalahan.')
@@ -160,15 +205,19 @@ export async function generateReportMessage(): Promise<{
 
   let messageText = `📋 *Laporan Absensi PPDF*\n📅 ${formattedDate}\n\n`
 
-  result.forEach(({ name, siswa, jumlahAlfa }) => {
-    messageText += `🏫 *${name} - ${jumlahAlfa} santri*\n`
-    siswa.forEach((student: any, index: number) => {
-      const jamKeList = student.alfa
-        .map((a: any) => a.jamKe.join(', '))
-        .join('; ')
-      messageText += `${index + 1}. ${student.name} (Jam ke: ${jamKeList})\n`
+  result.forEach(({ name: asramaName, jumlahAlfa, kelas }) => {
+    messageText += `🏫 *${asramaName} - ${jumlahAlfa} santri*\n`
+
+    kelas.forEach(({ name: kelasName, teacher, siswa }) => {
+      messageText += `  📚 *Kelas ${kelasName} - ${teacher}*\n`
+
+      siswa.forEach((student, index) => {
+        const jamKeList = student.alfa.map((a) => a.jamKe.join(', ')).join('; ')
+
+        messageText += `    ${index + 1}. ${student.name} (${jamKeList})\n`
+      })
+      messageText += `\n`
     })
-    messageText += `\n`
   })
 
   return { message: messageText.trim(), data: result }
@@ -205,17 +254,23 @@ export async function sendAbsensiReportById(id: number) {
     // 🔹 Format pesan laporan
     let messageText = `📋 *Laporan Absensi PPDF*\n📅 ${formattedDate}\n\n`
 
-    result.forEach(({ name, siswa, jumlahAlfa }) => {
-      messageText += `🏫 *${name} - ${jumlahAlfa} santri*\n`
+    result.forEach(({ name: asramaName, jumlahAlfa, kelas }) => {
+      messageText += `🏫 *${asramaName} - ${jumlahAlfa} santri*\n`
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      kelas.forEach(({ name: kelasName, teacher, siswa }) => {
+        messageText += `  📚 *Kelas ${kelasName} - ${teacher}*\n`
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        siswa.forEach((student, index) => {
+          const jamKeList = student.alfa
+            .map((a: any) => a.jamKe.join(', '))
+            .join('; ')
 
-      siswa.forEach((student: any, index: number) => {
-        const jamKeList = student.alfa
-          .map((a: any) => a.jamKe.join(', '))
-          .join('; ')
-        messageText += `${index + 1}. ${student.name} (Jam ke: ${jamKeList})\n`
+          messageText += `    ${index + 1}. ${student.name} (${jamKeList})\n`
+        })
+        messageText += `\n`
       })
-
-      messageText += `\n` // Baris kosong antar sekolah
     })
 
     // 🔹 Payload untuk WhatsApp

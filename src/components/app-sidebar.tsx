@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { LayoutDashboard, ListCheck, ListChecks, Skull } from 'lucide-react'
+import { LayoutDashboard, ListCheck, ListChecks } from 'lucide-react'
 
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
@@ -38,11 +38,11 @@ const data = {
       url: '/daftar',
       icon: ListChecks,
     },
-    {
-      name: 'Daftar Alfa',
-      url: '/pelanggaran',
-      icon: Skull,
-    },
+    // {
+    //   name: 'Daftar Alfa',
+    //   url: '/pelanggaran',
+    //   icon: Skull,
+    // },
   ],
 }
 

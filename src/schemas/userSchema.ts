@@ -6,5 +6,7 @@ export const userSchema = z.object({
   username: z.string().min(1),
   password: z.string().min(4),
   role: z.nativeEnum(RoleUser),
+  roleId: z.coerce.number().min(1),
+  asramaId: z.coerce.number().nullable(),
 })
 export type UserSchema = z.infer<typeof userSchema>

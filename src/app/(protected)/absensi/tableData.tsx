@@ -121,6 +121,8 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
     const id = parseInt(kelasId)
     try {
       const result = await getDataByKelasId(id)
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //   @ts-expect-error
       setSiswa(result)
       setKelasId(id)
 

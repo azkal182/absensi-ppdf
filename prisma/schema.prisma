@@ -14,13 +14,15 @@ datasource db {
 }
 
 model User {
-    id       Int       @id @default(autoincrement())
-    username String    @unique
+    id       Int        @id @default(autoincrement())
+    username String     @unique
     name     String
     password String
-    role     RoleUser? @default(USER)
+    role     RoleUser?  @default(USER) // Enum tetap dipertahankan
+    roles    UserRole[]
 
-    absensis Absensi[]
+    absensis   Absensi[]
+    UserAsrama UserAsrama[] // Menghubungkan user dengan asrama
 
     @@map("user")
 }
@@ -31,11 +33,39 @@ enum RoleUser {
     ASRAMA
 }
 
+model Role {
+    id    Int        @id @default(autoincrement())
+    name  String     @unique
+    users UserRole[]
+}
+
+model UserRole {
+    id     Int  @id @default(autoincrement())
+    userId Int
+    roleId Int
+    user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, roleId]) // Mencegah duplikasi role untuk user yang sama
+}
+
+model UserAsrama {
+    id       Int    @id @default(autoincrement())
+    userId   Int
+    asramaId Int
+    user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    asrama   Asrama @relation(fields: [asramaId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, asramaId])
+}
+
 model Asrama {
-    id      Int       @id @default(autoincrement())
-    name    String    @unique
-    classes Kelas[]
-    Absensi Absensi[]
+    id         Int          @id @default(autoincrement())
+    name       String       @unique
+    classes    Kelas[]
+    Absensi    Absensi[]
+    UserAsrama UserAsrama[] // Menghubungkan asrama dengan user
+    Siswa      Siswa[]
 
     @@map("asrama")
 }
@@ -56,9 +86,11 @@ model Kelas {
 model Siswa {
     id       Int       @id @default(autoincrement())
     name     String
-    kelasId  Int
-    kelas    Kelas     @relation(fields: [kelasId], references: [id])
+    kelasId  Int?
+    kelas    Kelas?    @relation(fields: [kelasId], references: [id])
     absesnis Absensi[]
+    asramaId Int?
+    asrama   Asrama?   @relation(fields: [asramaId], references: [id])
 
     @@unique([name, kelasId])
     @@index([kelasId])
