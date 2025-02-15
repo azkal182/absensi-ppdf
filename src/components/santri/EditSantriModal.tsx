@@ -13,6 +13,8 @@ import { Label } from '../ui/label'
 import { Button } from '../ui/button'
 import { SantriWithRelations } from '@/actions/santri'
 import { getClassByAsramaId } from '@/actions/absenAction'
+import { getPengurus } from '@/actions/pengurus'
+import { Pengurus } from '@prisma/client'
 
 export type Asrama = {
   id: number
@@ -41,17 +43,19 @@ const EditSantriModal = ({
   asrama,
   onSubmit,
 }: EditSantriModalProps) => {
-  const { register, handleSubmit, setValue, watch } = useForm<
+  const { register, handleSubmit, setValue, watch, reset } = useForm<
     Partial<SantriWithRelations>
   >({
     defaultValues: {
       name: '',
       asramaId: undefined,
       kelasId: undefined,
+      pengurusId: santri?.pengurusId,
     },
   })
 
   const [kelas, setKelas] = useState<Kelas[]>([]) // State untuk menyimpan daftar kelas
+  const [pengurus, setPengurus] = useState<Pengurus[]>([])
 
   // Set default values ketika santri tersedia
   useEffect(() => {
@@ -63,6 +67,19 @@ const EditSantriModal = ({
   }, [santri, setValue])
 
   const selectedAsramaId = watch('asramaId')
+
+  useEffect(() => {
+    const loadPengurus = async () => {
+      try {
+        const res = await getPengurus()
+        setPengurus(res)
+      } catch (error) {
+        console.error('Error fetching kelas:', error)
+        setKelas([])
+      }
+    }
+    loadPengurus()
+  }, [])
 
   // Fetch kelas ketika asrama berubah
   useEffect(() => {
@@ -88,10 +105,21 @@ const EditSantriModal = ({
   }, [selectedAsramaId, setValue])
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={() => {
+        reset({
+          name: '',
+          asramaId: undefined,
+          kelasId: undefined,
+          pengurusId: santri?.pengurusId,
+        })
+        onClose()
+      }}
+    >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Pindah Kelas?</DialogTitle>
+          <DialogTitle>Edit Santri?</DialogTitle>
         </DialogHeader>
 
         <form id="update-kelas-santri" onSubmit={handleSubmit(onSubmit)}>
@@ -160,6 +188,39 @@ const EditSantriModal = ({
                 </SelectContent>
               </Select>
             </div>
+            {/* Pilihan Pengurus */}
+            <div>
+              <Label>Pengurus</Label>
+              <Select
+                value={watch('pengurusId')?.toString() ?? ''}
+                onValueChange={(id) => {
+                  console.log('Selected pengurusId:', id)
+                  const pengurusId = id === 'null' ? null : parseInt(id) // Handle null value
+                  setValue('pengurusId', pengurusId)
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Pilih Pengurus" />
+                </SelectTrigger>
+                <SelectContent>
+                  {/* Menambahkan pilihan null */}
+                  <SelectItem value="null">Tidak Pengurus</SelectItem>
+
+                  {pengurus.length > 0 ? (
+                    pengurus.map((item) => (
+                      <SelectItem key={item.id} value={item.id.toString()}>
+                        {item.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="loading" disabled>
+                      Memuat pengurus...
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
             <Button type="submit">Simpan</Button>
           </div>
         </form>

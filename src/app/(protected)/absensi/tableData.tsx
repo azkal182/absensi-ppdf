@@ -59,7 +59,7 @@ export type SelectedAttendance = {
   asramaId?: number
   jamKe?: number
   date?: Date
-  data: { siswaId: number; status: string }[]
+  data: { siswaId: number; status: string; jamAbsensiId?: number }[]
 }
 
 const TableData = ({ asrama }: { asrama: AsramaProps }) => {
@@ -122,7 +122,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
     try {
       const result = await getDataByKelasId(id)
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //   @ts-expect-error
+      // @ts-expect-error
       setSiswa(result)
       setKelasId(id)
 
@@ -223,6 +223,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
     return siswa.filter((item) =>
       item.name.toLowerCase().includes(query.toLowerCase())
     )
+    console.log(filteredSiswa)
   }, [siswa, query])
 
   return (

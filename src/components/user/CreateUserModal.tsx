@@ -46,11 +46,13 @@ export default function CreateUserModal({
 
   const form = useForm<UserSchema>({
     resolver: zodResolver(userSchema),
+    mode: 'onBlur', // Validasi langsung saat field kehilangan fokus
     defaultValues: {
       name: '',
       username: '',
       password: '',
       role: 'USER',
+      asramaId: null,
     },
   })
 
@@ -63,10 +65,21 @@ export default function CreateUserModal({
     const result = await getAsrama()
     setAsramas(result)
   }
+
   useEffect(() => {
     fetchUserRoles()
     fetchAsrama()
   }, [])
+
+  // Handle submit dan log error
+  const handleSubmit = async (data: UserSchema) => {
+    try {
+      await onSubmit(data)
+      form.reset()
+    } catch (error) {
+      console.error('Submit error:', error)
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -75,7 +88,12 @@ export default function CreateUserModal({
           <DialogTitle>Create New User</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit, (errors) => {
+              console.error('Validation Errors:', errors)
+            })}
+            className="space-y-6"
+          >
             <FormField
               control={form.control}
               name="name"
@@ -129,6 +147,7 @@ export default function CreateUserModal({
                       const role = userRoles?.find(
                         (a) => a.id === parseInt(val)
                       )
+                      form.setValue('asramaId', null)
                       setSelectRole(role?.name as string)
                       field.onChange(Number(val))
                     }}
@@ -160,12 +179,14 @@ export default function CreateUserModal({
                   <FormItem>
                     <FormLabel>Asrama</FormLabel>
                     <Select
-                      onValueChange={(val) => field.onChange(Number(val))}
+                      onValueChange={(val) =>
+                        field.onChange(val ? Number(val) : null)
+                      }
                       defaultValue={field.value ? field.value.toString() : ''}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Pilih role" />
+                          <SelectValue placeholder="Pilih Asrama" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -179,11 +200,13 @@ export default function CreateUserModal({
                         ))}
                       </SelectContent>
                     </Select>
+
                     <FormMessage />
                   </FormItem>
                 )}
               />
             )}
+
             <div className="flex justify-end gap-2">
               <Button
                 type="button"

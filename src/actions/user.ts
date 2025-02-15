@@ -46,10 +46,32 @@ export const createUser = async (data: UserSchema) => {
 
   try {
     const hashedPassword = await bcrypt.hash(data.password, 10)
-    const result = await prisma.user.create({
-      data: { ...data, password: hashedPassword },
+
+    // Buat user baru
+    const user = await prisma.user.create({
+      data: {
+        name: data.name,
+        username: data.username,
+        password: hashedPassword,
+        roles: {
+          create: {
+            role: { connect: { id: data.roleId } },
+          },
+        },
+      },
     })
-    return { message: 'success', data: result }
+
+    // Jika ada asramaId, tambahkan ke UserAsrama
+    if (data.asramaId) {
+      await prisma.userAsrama.create({
+        data: {
+          userId: user.id,
+          asramaId: data.asramaId,
+        },
+      })
+    }
+
+    return { message: 'success', data: user }
   } catch (error) {
     console.log(error)
     return { error: 'error saving user' }

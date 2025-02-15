@@ -41,7 +41,6 @@ const DataPage = () => {
       const data = await getAsramaWithFullData()
       setAsrama(data)
     }
-
     fetchAsrama()
   }, [])
   return (

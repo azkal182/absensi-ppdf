@@ -84,13 +84,15 @@ model Kelas {
 }
 
 model Siswa {
-    id       Int       @id @default(autoincrement())
-    name     String
-    kelasId  Int?
-    kelas    Kelas?    @relation(fields: [kelasId], references: [id])
-    absesnis Absensi[]
-    asramaId Int?
-    asrama   Asrama?   @relation(fields: [asramaId], references: [id])
+    id         Int       @id @default(autoincrement())
+    name       String
+    kelasId    Int?
+    kelas      Kelas?    @relation(fields: [kelasId], references: [id])
+    absesnis   Absensi[]
+    asramaId   Int?
+    asrama     Asrama?   @relation(fields: [asramaId], references: [id])
+    pengurusId Int?
+    pengurus   Pengurus? @relation(fields: [pengurusId], references: [id])
 
     @@unique([name, kelasId])
     @@index([kelasId])
@@ -153,4 +155,11 @@ model ReportWhatsapp {
 enum TypeReportWhatsapp {
     GROUP
     PERSONAL
+}
+
+model Pengurus {
+    id   Int    @id @default(autoincrement())
+    name String
+
+    Siswa Siswa[]
 }

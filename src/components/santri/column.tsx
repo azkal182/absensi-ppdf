@@ -133,10 +133,23 @@ export const getColumns = ({
     header: 'Kelas',
     cell: ({ row }) => {
       const santri = row.original
+
       if (!santri.kelas) {
         return <span>-</span>
       }
       return <span>{`${santri.kelas.name} - ${santri.kelas.teacher}`}</span>
+    },
+  },
+  {
+    id: 'asrama.name',
+    header: 'Pengurus',
+    cell: ({ row }) => {
+      const pengurus = row.original.pengurus
+
+      if (!pengurus) {
+        return <span>-</span>
+      }
+      return <span>{`${pengurus.name}`}</span>
     },
   },
   {
@@ -161,7 +174,7 @@ export const getColumns = ({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onOpenModal(siswa)}>
-              Pindah Kelas
+              Edit Santri
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

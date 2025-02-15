@@ -115,12 +115,9 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
       throw new Error('Data absensi tidak boleh kosong.')
     }
 
-    console.log(date)
-
     const tanggalAbsensi = new Date(date)
     tanggalAbsensi.setHours(0, 0, 0, 0)
     const jakartaDate = new Date(date)
-    console.log(jakartaDate)
 
     const jakartaDateWithTime = toZonedTime(jakartaDate, 'Asia/Jakarta') // Convert to Asia/Jakarta time
     jakartaDateWithTime.setHours(0, 0, 0, 0) // Set the time to 00:00
@@ -131,8 +128,6 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
     // Step 3: You now have a Date object in UTC
     console.log('Asia/Jakarta Time:', jakartaDateWithTime)
     console.log('Converted UTC Date:', utcDate)
-
-    console.log(tanggalAbsensi)
 
     const tanggalAbsensiUTC = fromZonedTime(tanggalAbsensi, 'Asia/Jakarta')
     console.log(tanggalAbsensiUTC)
@@ -161,6 +156,8 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
 
       // Jika absensi belum ada, buat entri baru
       if (!absensi) {
+        console.log('data baru')
+
         absensi = await prisma.absensi.create({
           data: {
             siswaId: item.siswaId,
@@ -190,6 +187,31 @@ export async function saveData(dataAbsens: SelectedAttendance, userId: number) {
     await prisma.$transaction(transaksi)
 
     return { success: true, count: transaksi.length }
+  } catch (error) {
+    console.error('Error saat menyimpan data absensi:', error)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    return { success: false, message: error.message }
+  }
+}
+
+export const updateDataAbsen = async (dataAbsens: SelectedAttendance) => {
+  console.log(dataAbsens)
+
+  try {
+    await Promise.all(
+      dataAbsens.data?.map((item) =>
+        prisma.jamAbsensi.update({
+          where: {
+            id: item.jamAbsensiId,
+          },
+          data: {
+            status: item.status as any,
+          },
+        })
+      )
+    )
+    return { success: true, messasge: 'Data Absensi berhasil di update' }
   } catch (error) {
     console.error('Error saat menyimpan data absensi:', error)
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -351,8 +373,6 @@ export async function getDaftarAbsenTodayByKelasId(
     // Konversi kembali ke UTC
     const todayUtc = fromZonedTime(todayJakarta, 'Asia/Jakarta')
 
-    console.log(todayUtc)
-
     const absensiList = await prisma.absensi.findMany({
       where: {
         date: todayUtc.toISOString(),
@@ -364,6 +384,7 @@ export async function getDaftarAbsenTodayByKelasId(
         siswa: true,
         JamAbsensi: {
           select: {
+            id: true,
             jamKe: true,
             status: true,
           },
@@ -395,6 +416,7 @@ export async function getDaftarAbsenTodayByKelasId(
       // Add all available jamKe for this date
       absensi.JamAbsensi.forEach((jam) => {
         siswaMap.get(siswaId).data.push({
+          jamAbsensiId: jam.id,
           jamKe: jam.jamKe,
           status: jam.status,
         })

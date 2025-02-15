@@ -8,10 +8,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
-  cekAbsensiMultiJam,
   getClassByAsramaId,
   getDaftarAbsenTodayByKelasId,
-  saveData,
+  updateDataAbsen,
 } from '@/actions/absenAction'
 import {
   Table,
@@ -32,7 +31,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
-import { useCurrentSession } from '@/hooks/useCurrentUser'
 import { Label } from '@/components/ui/label'
 import SearchInput from '@/components/search-input'
 import { format, toZonedTime } from 'date-fns-tz'
@@ -52,6 +50,7 @@ export type KelasData = {
 
 type SiswaData = {
   id: number
+  jamAbsensiId: number
   name: string
   kelasId: number
 }[]
@@ -61,11 +60,10 @@ export type SelectedAttendance = {
   asramaId?: number
   jamKe?: number
   date?: Date
-  data: { siswaId: number; status: string }[]
+  data: { jamAbsensiId: number; siswaId: number; status: string }[]
 }
 
 const TableData = ({ asrama }: { asrama: AsramaProps }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [asramaId, setAsramaId] = useState<number | undefined>()
   const [kelas, setKelas] = useState<KelasData | []>([])
   const [siswa, setSiswa] = useState<SiswaData | []>([])
@@ -89,12 +87,13 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
       data: [],
     })
   const [query, setQuery] = useState('')
-  const { session } = useCurrentSession()
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [kelasId, setKelasId] = useState<number | null>(null)
   const [countdown, setCountdown] = useState('')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isDisabled, setIsDisabled] = useState(false)
   const [listJam, setListJam] = useState<any[]>([])
+  const [globalData, setGlobalData] = useState<any>([])
 
   const { toast } = useToast()
 
@@ -104,13 +103,13 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
     const updateCountdown = () => {
       const now = toZonedTime(new Date(), timeZone)
       const target = new Date(now)
-      target.setHours(13, 0, 0, 0) // Set target waktu ke 13:00:00
+      target.setHours(14, 0, 0, 0)
 
       const diff = target.getTime() - now.getTime()
 
       if (diff <= 0) {
         setCountdown('Waktu habis')
-        // setIsDisabled(true)
+        setIsDisabled(true)
         return
       }
 
@@ -126,10 +125,16 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
 
     return () => clearInterval(interval)
   }, [])
-  const handleCheckboxChange = (siswaId: number, status: string) => {
+  const handleCheckboxChange = (
+    jamAbsensiId: number,
+    siswaId: number,
+    status: string
+  ) => {
     setSelectedAttendance((prev) => {
       const updatedData = prev.data.filter((item) => item.siswaId !== siswaId)
-      updatedData.push({ siswaId, status })
+      console.log(updatedData)
+
+      updatedData.push({ siswaId, status, jamAbsensiId })
 
       return {
         ...prev,
@@ -158,6 +163,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
     setKelasId(id)
     try {
       const data = await getDaftarAbsenTodayByKelasId(id)
+      console.log(id, data)
 
       if (Array.isArray(data)) {
         const listJamArray = [
@@ -167,30 +173,67 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
         ]
 
         setListJam(listJamArray)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        setSiswa(data)
 
-        // const defaultAttendance = data.map((ite: any) => ({
+        // const defaultAttendance = data?.data.map((item: any) => ({
         //   siswaId: item.id,
         //   status: 'HADIR',
         // }))
 
-        console.log(JSON.stringify(data, null, 2))
+        // console.log(JSON.stringify(data, null, 2))
+        setGlobalData(data)
 
-        // setSelectedAttendance((prev) => ({
-        //   ...prev,
-        //   kelasId: id,
-        //   asramaId: asramaId,
-        //   // jamKe: parseInt(jamKe), // Gunakan nilai jamKe yang sudah ada
-        //   date: new Date(new Date().setDate(new Date().getDate())),
-        //   data: defaultAttendance,
-        // }))
+        setSelectedAttendance((prev) => ({
+          ...prev,
+          kelasId: id,
+          asramaId: asramaId,
+          // jamKe: parseInt(jamKe), // Gunakan nilai jamKe yang sudah ada
+          //   date: new Date(new Date().setDate(new Date().getDate())),
+          //   data: defaultAttendance,
+        }))
       }
     } catch (error) {
       alert(error)
     }
   }
 
+  const findByJamKe = (data: any, jamKe: any) => {
+    return data
+      .map((siswa: any) => {
+        const statusData = siswa.data.find((d: any) => d.jamKe === jamKe)
+        return statusData
+          ? {
+              siswaId: siswa.id,
+              status: statusData.status,
+              jamAbsensiId: statusData.jamAbsensiId,
+            }
+          : null
+      })
+      .filter(Boolean) // Menghapus nilai null jika tidak ada data yang sesuai
+  }
   const handleChangeJam = (jam: number) => {
-    console.log(jam)
+    const filterData = findByJamKe(globalData, jam)
+    const mappedData = siswa.map((item: any) => {
+      const matchingData = filterData.find(
+        (data: any) => data.siswaId === item.id
+      )
+
+      return {
+        ...item,
+        jamAbsensiId: matchingData ? matchingData.jamAbsensiId : null, // Default null jika tidak ditemukan
+      }
+    })
+
+    setSiswa(mappedData)
+
+    setSelectedAttendance((prev) => ({
+      ...prev,
+      jamKe: jam,
+      date: new Date(new Date().setDate(new Date().getDate())),
+      data: filterData,
+    }))
   }
 
   const countStatus = (status: string) => {
@@ -208,10 +251,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
         return
       }
 
-      const response = await saveData(
-        selectedAttendance,
-        parseInt(session?.user?.id as unknown as string)
-      )
+      const response = await updateDataAbsen(selectedAttendance)
 
       if (!response.success) {
         toast({
@@ -223,16 +263,9 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
         setDialog(false)
         toast({
           title: 'Sukses',
-          description: 'Data berhasil disimpan',
+          description: response.message,
         })
-        const test = await cekAbsensiMultiJam(
-          kelasId!,
-          new Date(),
-          [1, 2, 3, 4, 5]
-        )
-        setAvail(test)
         setJamKe(undefined)
-        setSiswa([])
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
@@ -397,52 +430,65 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredSiswa?.map((item, index) => (
-              <TableRow key={index}>
-                <TableCell className="text-center">{index + 1}</TableCell>
-                <TableCell>{item.name}</TableCell>
-                <TableCell>
-                  <Checkbox
-                    checked={selectedAttendance.data.some(
-                      (att) => att.siswaId === item.id && att.status === 'HADIR'
-                    )}
-                    onCheckedChange={() =>
-                      handleCheckboxChange(item.id, 'HADIR')
-                    }
-                  />
-                </TableCell>
-                <TableCell>
-                  <Checkbox
-                    checked={selectedAttendance.data.some(
-                      (att) => att.siswaId === item.id && att.status === 'IZIN'
-                    )}
-                    onCheckedChange={() =>
-                      handleCheckboxChange(item.id, 'IZIN')
-                    }
-                  />
-                </TableCell>
-                <TableCell>
-                  <Checkbox
-                    checked={selectedAttendance.data.some(
-                      (att) => att.siswaId === item.id && att.status === 'SAKIT'
-                    )}
-                    onCheckedChange={() =>
-                      handleCheckboxChange(item.id, 'SAKIT')
-                    }
-                  />
-                </TableCell>
-                <TableCell>
-                  <Checkbox
-                    checked={selectedAttendance.data.some(
-                      (att) => att.siswaId === item.id && att.status === 'ALFA'
-                    )}
-                    onCheckedChange={() =>
-                      handleCheckboxChange(item.id, 'ALFA')
-                    }
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+            {jamKe &&
+              filteredSiswa?.map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell className="text-center">{index + 1}</TableCell>
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedAttendance.data.some(
+                        (att) =>
+                          att.siswaId === item.id && att.status === 'HADIR'
+                      )}
+                      onCheckedChange={() =>
+                        handleCheckboxChange(
+                          item.jamAbsensiId,
+                          item.id,
+                          'HADIR'
+                        )
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedAttendance.data.some(
+                        (att) =>
+                          att.siswaId === item.id && att.status === 'IZIN'
+                      )}
+                      onCheckedChange={() =>
+                        handleCheckboxChange(item.jamAbsensiId, item.id, 'IZIN')
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedAttendance.data.some(
+                        (att) =>
+                          att.siswaId === item.id && att.status === 'SAKIT'
+                      )}
+                      onCheckedChange={() =>
+                        handleCheckboxChange(
+                          item.jamAbsensiId,
+                          item.id,
+                          'SAKIT'
+                        )
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedAttendance.data.some(
+                        (att) =>
+                          att.siswaId === item.id && att.status === 'ALFA'
+                      )}
+                      onCheckedChange={() =>
+                        handleCheckboxChange(item.jamAbsensiId, item.id, 'ALFA')
+                      }
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
 

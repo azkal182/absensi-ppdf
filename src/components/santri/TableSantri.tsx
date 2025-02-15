@@ -43,6 +43,7 @@ const TableSantri = () => {
 
   const loadSantri = async () => {
     const santri = await getAllSantri()
+
     setSantris(santri)
   }
 
@@ -73,6 +74,7 @@ const TableSantri = () => {
       description: 'Santri Berhasil diupdate',
     })
   }
+
   return (
     <div>
       <Card className="p-4">

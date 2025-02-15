@@ -54,7 +54,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.projects} role={session?.user?.role} />
+        <NavMain items={data.projects} role={session?.user?.role as string} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser

@@ -7,6 +7,6 @@ export const userSchema = z.object({
   password: z.string().min(4),
   role: z.nativeEnum(RoleUser),
   roleId: z.coerce.number().min(1),
-  asramaId: z.coerce.number().nullable(),
+  asramaId: z.union([z.coerce.number().min(1), z.null()]), // Bisa angka atau null
 })
 export type UserSchema = z.infer<typeof userSchema>

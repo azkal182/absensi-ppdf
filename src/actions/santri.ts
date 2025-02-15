@@ -21,6 +21,7 @@ export type SantriWithRelations = Prisma.SiswaGetPayload<{
         name: true
       }
     }
+    pengurus: true
   }
 }>
 
@@ -38,8 +39,12 @@ export const getAllSantri = async (): Promise<SantriWithRelations[]> => {
           name: true,
         },
       },
+      pengurus: true,
     },
+    orderBy: { id: 'asc' },
   })
+
+  console.log(JSON.stringify(santri, null, 2))
 
   return santri
 }
