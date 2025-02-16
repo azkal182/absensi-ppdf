@@ -674,6 +674,140 @@ export async function getChartThisMonth() {
 //     }
 // }
 
+// export async function getDaftarAlfa() {
+//     try {
+//         // Ambil waktu saat ini dan ubah ke zona Asia/Jakarta
+//         const todayJakarta = toZonedTime(new Date(), 'Asia/Jakarta')
+
+//         // Set jam ke 00:00 di zona Jakarta
+//         todayJakarta.setHours(0, 0, 0, 0)
+
+//         // Konversi kembali ke UTC
+//         const todayUtc = fromZonedTime(todayJakarta, 'Asia/Jakarta')
+
+//         const absensiAlfa = await prisma.absensi.findMany({
+//             where: {
+//                 date: todayUtc.toISOString(),
+//                 OR: [
+//                     { status: 'ALFA' },
+//                     {
+//                         JamAbsensi: {
+//                             some: { status: 'ALFA' },
+//                         },
+//                     },
+//                 ],
+//             },
+//             include: {
+//                 siswa: {
+//                     include: {
+//                         pengurus: true,
+//                     },
+//                 },
+//                 asrama: true,
+//                 kelas: true,
+//                 JamAbsensi: {
+//                     select: {
+//                         jamKe: true,
+//                         status: true,
+//                         date: true,
+//                     },
+//                     orderBy: { jamKe: 'asc' },
+//                 },
+//             },
+//             orderBy: [{ asramaId: 'asc' }, { siswaId: 'asc' }, { date: 'asc' }],
+//         })
+
+//         if (!absensiAlfa || absensiAlfa.length === 0) {
+//             return []
+//         }
+//         // console.log(JSON.stringify(absensiAlfa, nulln2));
+
+//         const asramaMap = new Map()
+
+//         absensiAlfa.forEach((absensi) => {
+//             const asramaId = absensi.asrama?.id ?? 0
+//             const asramaName = absensi.asrama?.name ?? 'Unknown'
+//             const kelasId = absensi.kelas?.id ?? 0
+//             const kelasName = absensi.kelas?.name ?? 'Unknown'
+//             const teacherName = absensi.kelas?.teacher ?? 'Unknown'
+//             const isPengurus = !!absensi.siswa?.pengurus // Pastikan boolean
+
+//             if (!asramaMap.has(asramaId)) {
+//                 asramaMap.set(asramaId, {
+//                     id: asramaId,
+//                     name: asramaName,
+//                     jumlahAlfa: 0,
+//                     jumlahAlfaPengurus: 0,
+//                     jumlahAlfaSantri: 0,
+//                     kelas: new Map(),
+//                 })
+//             }
+
+//             const asramaData = asramaMap.get(asramaId)
+
+//             if (!asramaData.kelas.has(kelasId)) {
+//                 asramaData.kelas.set(kelasId, {
+//                     id: kelasId,
+//                     name: kelasName,
+//                     teacher: teacherName,
+//                     siswa: [],
+//                 })
+//             }
+
+//             const kelasData = asramaData.kelas.get(kelasId)
+
+//             const siswaId = absensi.siswa?.id ?? 0
+//             if (!kelasData.siswa.some((s: any) => s.id === siswaId)) {
+//                 kelasData.siswa.push({
+//                     id: siswaId,
+//                     name: absensi.siswa?.name ?? 'Unknown',
+//                     pengurusName: absensi.siswa.pengurus?.name ?? null,
+//                     alfa: [],
+//                 })
+//             }
+
+//             const siswaData = kelasData.siswa.find((s: any) => s.id === siswaId)
+
+//             const formattedDate = new Date(absensi.date).toISOString().split('T')[0]
+//             const existingEntry = siswaData.alfa.find(
+//                 (entry: any) => entry.date === formattedDate
+//             )
+
+//             const jamAbsensiAlfa = absensi.JamAbsensi.filter(
+//                 (jam) => jam.status === 'ALFA'
+//             ).map((jam) => jam.jamKe)
+
+//             if (existingEntry) {
+//                 existingEntry.jamKe.push(...jamAbsensiAlfa)
+//             } else {
+//                 siswaData.alfa.push({
+//                     date: formattedDate,
+//                     jamKe: jamAbsensiAlfa,
+//                     status: 'ALFA',
+//                 })
+//             }
+
+//             if (isPengurus) {
+//                 asramaData.jumlahAlfaPengurus += 1
+//             } else {
+//                 asramaData.jumlahAlfaSantri += 1
+//             }
+//             asramaData.jumlahAlfa += 1
+//         })
+
+//         // Konversi Map ke Array
+//         const result = Array.from(asramaMap.values()).map((asrama) => ({
+//             ...asrama,
+//             kelas: Array.from(asrama.kelas.values()),
+//         }))
+//         console.log(JSON.stringify(result, null, 2));
+
+//         // return result
+//     } catch (error) {
+//         console.error('Error fetching absensi ALFA:', error)
+//         return { error: 'Terjadi kesalahan saat mengambil data absensi ALFA.' }
+//     }
+// }
 export async function getDaftarAlfa() {
   try {
     // Ambil waktu saat ini dan ubah ke zona Asia/Jakarta
@@ -720,7 +854,6 @@ export async function getDaftarAlfa() {
     if (!absensiAlfa || absensiAlfa.length === 0) {
       return []
     }
-    // console.log(JSON.stringify(absensiAlfa, nulln2));
 
     const asramaMap = new Map()
 
@@ -777,29 +910,42 @@ export async function getDaftarAlfa() {
         (jam) => jam.status === 'ALFA'
       ).map((jam) => jam.jamKe)
 
-      if (existingEntry) {
-        existingEntry.jamKe.push(...jamAbsensiAlfa)
-      } else {
-        siswaData.alfa.push({
-          date: formattedDate,
-          jamKe: jamAbsensiAlfa,
-          status: 'ALFA',
-        })
+      if (jamAbsensiAlfa.length > 0) {
+        if (existingEntry) {
+          existingEntry.jamKe.push(...jamAbsensiAlfa)
+        } else {
+          siswaData.alfa.push({
+            date: formattedDate,
+            jamKe: jamAbsensiAlfa,
+            status: 'ALFA',
+          })
+        }
       }
 
-      if (isPengurus) {
-        asramaData.jumlahAlfaPengurus += 1
-      } else {
-        asramaData.jumlahAlfaSantri += 1
+      if (siswaData.alfa.length === 0) {
+        kelasData.siswa = kelasData.siswa.filter((s: any) => s.id !== siswaId)
       }
-      asramaData.jumlahAlfa += 1
+
+      if (siswaData.alfa.length > 0) {
+        if (isPengurus) {
+          asramaData.jumlahAlfaPengurus += 1
+        } else {
+          asramaData.jumlahAlfaSantri += 1
+        }
+        asramaData.jumlahAlfa += 1
+      }
     })
 
     // Konversi Map ke Array
     const result = Array.from(asramaMap.values()).map((asrama) => ({
       ...asrama,
-      kelas: Array.from(asrama.kelas.values()),
+      kelas: Array.from(asrama.kelas.values()).map((kelas: any) => ({
+        ...kelas,
+        siswa: kelas.siswa.filter((s: any) => s.alfa.length > 0),
+      })),
     }))
+
+    console.log(JSON.stringify(result, null, 2))
 
     return result
   } catch (error) {
