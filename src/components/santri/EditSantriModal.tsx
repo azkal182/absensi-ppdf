@@ -104,14 +104,26 @@ const EditSantriModal = ({
     fetchKelas()
   }, [selectedAsramaId, setValue])
 
-  const handleFormSubmit = (data: Partial<SantriWithRelations>) => {
-    onSubmit(data) // Kirim data ke parent component
-    reset({
-      name: '',
-      asramaId: undefined,
-      kelasId: undefined,
-      pengurusId: santri?.pengurusId,
-    }) // Reset form setelah submit
+  useEffect(() => {
+    if (!isOpen) {
+      reset({
+        name: '',
+        asramaId: undefined,
+        kelasId: undefined,
+        pengurusId: santri?.pengurusId,
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, reset])
+
+  const handleFormSubmit = async (data: Partial<SantriWithRelations>) => {
+    onSubmit(data)
+    // reset({
+    //   name: '',
+    //   asramaId: undefined,
+    //   kelasId: undefined,
+    //   pengurusId: santri?.pengurusId,
+    // })
   }
 
   return (
