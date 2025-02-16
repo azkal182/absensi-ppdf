@@ -194,7 +194,7 @@ export async function generateReportMessage(): Promise<{
   message: string
   data: Asrama[]
 }> {
-  const result: Asrama[] | { error: string } = await getDaftarAlfa()
+  const result: any[] | { error: string } = await getDaftarAlfa()
 
   if ('error' in result || !Array.isArray(result) || result.length === 0) {
     throw new Error('Data tidak tersedia atau terjadi kesalahan.')
@@ -203,22 +203,36 @@ export async function generateReportMessage(): Promise<{
   const today = getTodayInJakarta()
   const formattedDate = formatDate(today)
 
+  if ('error' in result) {
+    throw new Error('Gagal mengirim laporan absensi.')
+  }
+
+  if (!Array.isArray(result) || result.length === 0) {
+    throw new Error('Data tidak tersedia atau terjadi kesalahan.')
+  }
+
   let messageText = `📋 *Laporan Absensi PPDF*\n📅 ${formattedDate}\n\n`
 
-  result.forEach(({ name: asramaName, jumlahAlfa, kelas }) => {
-    messageText += `🏫 *${asramaName} - ${jumlahAlfa} santri*\n`
+  result.forEach(
+    ({ name: asramaName, kelas, jumlahAlfaPengurus, jumlahAlfaSantri }) => {
+      messageText += `🏫 *${asramaName} - ${jumlahAlfaSantri} santri - ${jumlahAlfaPengurus} Pengurus*\n`
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      kelas.forEach(({ name: kelasName, teacher, siswa }) => {
+        messageText += `  📚 *Kelas ${kelasName} - ${teacher}*\n`
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        siswa.forEach((student, index) => {
+          const jamKeList = student.alfa
+            .map((a: any) => a.jamKe.join(', '))
+            .join('; ')
 
-    kelas.forEach(({ name: kelasName, teacher, siswa }) => {
-      messageText += `  📚 *Kelas ${kelasName} - ${teacher}*\n`
-
-      siswa.forEach((student, index) => {
-        const jamKeList = student.alfa.map((a) => a.jamKe.join(', ')).join('; ')
-
-        messageText += `    ${index + 1}. ${student.name} (${jamKeList})\n`
+          messageText += `    ${index + 1}. ${student.name} (${jamKeList}) ${student?.pengurusName ? '*' + student?.pengurusName + '*' : ''}\n`
+        })
+        messageText += `\n`
       })
-      messageText += `\n`
-    })
-  })
+    }
+  )
 
   return { message: messageText.trim(), data: result }
 }
