@@ -35,6 +35,7 @@ import { Label } from '@/components/ui/label'
 import SearchInput from '@/components/search-input'
 import { format, toZonedTime } from 'date-fns-tz'
 import { id } from 'date-fns/locale'
+import { useCurrentSession } from '@/hooks/useCurrentUser'
 
 export type AsramaProps = {
   name: string
@@ -87,6 +88,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
       data: [],
     })
   const [query, setQuery] = useState('')
+  const { session } = useCurrentSession()
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [kelasId, setKelasId] = useState<number | null>(null)
@@ -109,7 +111,9 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
 
       if (diff <= 0) {
         setCountdown('Waktu habis')
-        setIsDisabled(true)
+        if (session?.user?.role !== 'ADMIN') {
+          setIsDisabled(true)
+        }
         return
       }
 
@@ -124,7 +128,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
     const interval = setInterval(updateCountdown, 1000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [session?.user?.role])
   const handleCheckboxChange = (
     jamAbsensiId: number,
     siswaId: number,
