@@ -161,6 +161,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
   const handleChangeKelas = async (kelasId: string) => {
     const id = parseInt(kelasId)
     setKelasId(id)
+    setJamKe(undefined)
     try {
       const data = await getDaftarAbsenTodayByKelasId(id)
       console.log(id, data)
@@ -222,7 +223,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
 
       return {
         ...item,
-        jamAbsensiId: matchingData ? matchingData.jamAbsensiId : null, // Default null jika tidak ditemukan
+        jamAbsensiId: matchingData ? matchingData.jamAbsensiId : null,
       }
     })
 
