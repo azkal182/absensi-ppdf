@@ -104,6 +104,16 @@ const EditSantriModal = ({
     fetchKelas()
   }, [selectedAsramaId, setValue])
 
+  const handleFormSubmit = (data: Partial<SantriWithRelations>) => {
+    onSubmit(data) // Kirim data ke parent component
+    reset({
+      name: '',
+      asramaId: undefined,
+      kelasId: undefined,
+      pengurusId: santri?.pengurusId,
+    }) // Reset form setelah submit
+  }
+
   return (
     <Dialog
       open={isOpen}
@@ -122,7 +132,10 @@ const EditSantriModal = ({
           <DialogTitle>Edit Santri?</DialogTitle>
         </DialogHeader>
 
-        <form id="update-kelas-santri" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          id="update-kelas-santri"
+          onSubmit={handleSubmit(handleFormSubmit)}
+        >
           <div className="space-y-4">
             <div>
               <Label htmlFor="name">Nama</Label>

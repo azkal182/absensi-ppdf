@@ -236,6 +236,7 @@ export async function sendAbsensiReportById(id: number) {
     if (!Array.isArray(result) || result.length === 0) {
       throw new Error('Data tidak tersedia atau terjadi kesalahan.')
     }
+    console.log(JSON.stringify(result, null, 2))
 
     // 🔹 Ambil daftar nomor WhatsApp & Telegram
     const listJid = await getReportWhatsapp()
@@ -254,24 +255,26 @@ export async function sendAbsensiReportById(id: number) {
     // 🔹 Format pesan laporan
     let messageText = `📋 *Laporan Absensi PPDF*\n📅 ${formattedDate}\n\n`
 
-    result.forEach(({ name: asramaName, jumlahAlfa, kelas }) => {
-      messageText += `🏫 *${asramaName} - ${jumlahAlfa} santri*\n`
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      kelas.forEach(({ name: kelasName, teacher, siswa }) => {
-        messageText += `  📚 *Kelas ${kelasName} - ${teacher}*\n`
+    result.forEach(
+      ({ name: asramaName, kelas, jumlahAlfaPengurus, jumlahAlfaSantri }) => {
+        messageText += `🏫 *${asramaName} - ${jumlahAlfaSantri} santri - ${jumlahAlfaPengurus} Pengurus*\n`
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
-        siswa.forEach((student, index) => {
-          const jamKeList = student.alfa
-            .map((a: any) => a.jamKe.join(', '))
-            .join('; ')
+        kelas.forEach(({ name: kelasName, teacher, siswa }) => {
+          messageText += `  📚 *Kelas ${kelasName} - ${teacher}*\n`
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          siswa.forEach((student, index) => {
+            const jamKeList = student.alfa
+              .map((a: any) => a.jamKe.join(', '))
+              .join('; ')
 
-          messageText += `    ${index + 1}. ${student.name} (${jamKeList})\n`
+            messageText += `    ${index + 1}. ${student.name} (${jamKeList}) ${student?.pengurusName ? '*' + student?.pengurusName + '*' : ''}\n`
+          })
+          messageText += `\n`
         })
-        messageText += `\n`
-      })
-    })
+      }
+    )
 
     // 🔹 Payload untuk WhatsApp
     const payloadWhatsApp = filteredJid

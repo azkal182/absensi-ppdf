@@ -698,7 +698,11 @@ export async function getDaftarAlfa() {
         ],
       },
       include: {
-        siswa: true,
+        siswa: {
+          include: {
+            pengurus: true,
+          },
+        },
         asrama: true,
         kelas: true,
         JamAbsensi: {
@@ -716,6 +720,7 @@ export async function getDaftarAlfa() {
     if (!absensiAlfa || absensiAlfa.length === 0) {
       return []
     }
+    // console.log(JSON.stringify(absensiAlfa, nulln2));
 
     const asramaMap = new Map()
 
@@ -725,12 +730,15 @@ export async function getDaftarAlfa() {
       const kelasId = absensi.kelas?.id ?? 0
       const kelasName = absensi.kelas?.name ?? 'Unknown'
       const teacherName = absensi.kelas?.teacher ?? 'Unknown'
+      const isPengurus = !!absensi.siswa?.pengurus // Pastikan boolean
 
       if (!asramaMap.has(asramaId)) {
         asramaMap.set(asramaId, {
           id: asramaId,
           name: asramaName,
           jumlahAlfa: 0,
+          jumlahAlfaPengurus: 0,
+          jumlahAlfaSantri: 0,
           kelas: new Map(),
         })
       }
@@ -753,6 +761,7 @@ export async function getDaftarAlfa() {
         kelasData.siswa.push({
           id: siswaId,
           name: absensi.siswa?.name ?? 'Unknown',
+          pengurusName: absensi.siswa.pengurus?.name ?? null,
           alfa: [],
         })
       }
@@ -778,6 +787,11 @@ export async function getDaftarAlfa() {
         })
       }
 
+      if (isPengurus) {
+        asramaData.jumlahAlfaPengurus += 1
+      } else {
+        asramaData.jumlahAlfaSantri += 1
+      }
       asramaData.jumlahAlfa += 1
     })
 
