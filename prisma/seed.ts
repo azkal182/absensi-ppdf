@@ -203,47 +203,87 @@
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
-async function createPengurus() {
-  const data = [
-    { name: 'Dep. Sekretaris Pusat' },
-    { name: 'Dep. Amtsilati Store' },
-    { name: 'Dep. Pengawas Keuangan' },
-    { name: "Dep. Ta'lim Wal Ibadah" },
-    { name: 'Dep. Keamanan Pusat' },
-    { name: 'Badan Tashih' },
-    { name: 'Dep. Komite Disiplin' },
-    { name: 'Dep. Kesehatan Pusat' },
-    { name: 'Dep. IT & Pusat Data' },
-    { name: 'Dep. Amtsilati Media' },
-    { name: 'Dep. Akselerasi' },
-    { name: 'Badan Lajnah & Kaderisasi' },
-    { name: 'Dep. Budi Pekerti' },
-    { name: 'Dep. Pemuda & Olahraga' },
-    { name: 'Dep. Kebersihan' },
-    { name: 'Dep. Perlengkapan & Tata Ruang' },
-    { name: 'Dep. Bansus Amtsilati' },
-    { name: 'Dep. Logistik & Pangan' },
-    { name: 'Akasia' },
-    { name: 'Badan Thoriqoh' },
-    { name: 'Dep. Humas' },
-    { name: "Asrama An-Na'im" },
-    { name: 'Asrama Tasawwuf' },
-    { name: 'Asrama Illiyyin' },
-    { name: 'Asrama Takhossus' },
-    { name: 'Asrama Darussalam' },
-    { name: 'Asrama Darul Musthofa' },
-    { name: "Asrama Al-Ma'wa" },
-    { name: 'Dep. Pesanggrahan' },
-  ]
+// async function createPengurus() {
+//   const data = [
+//     { name: 'Dep. Sekretaris Pusat' },
+//     { name: 'Dep. Amtsilati Store' },
+//     { name: 'Dep. Pengawas Keuangan' },
+//     { name: "Dep. Ta'lim Wal Ibadah" },
+//     { name: 'Dep. Keamanan Pusat' },
+//     { name: 'Badan Tashih' },
+//     { name: 'Dep. Komite Disiplin' },
+//     { name: 'Dep. Kesehatan Pusat' },
+//     { name: 'Dep. IT & Pusat Data' },
+//     { name: 'Dep. Amtsilati Media' },
+//     { name: 'Dep. Akselerasi' },
+//     { name: 'Badan Lajnah & Kaderisasi' },
+//     { name: 'Dep. Budi Pekerti' },
+//     { name: 'Dep. Pemuda & Olahraga' },
+//     { name: 'Dep. Kebersihan' },
+//     { name: 'Dep. Perlengkapan & Tata Ruang' },
+//     { name: 'Dep. Bansus Amtsilati' },
+//     { name: 'Dep. Logistik & Pangan' },
+//     { name: 'Akasia' },
+//     { name: 'Badan Thoriqoh' },
+//     { name: 'Dep. Humas' },
+//     { name: "Asrama An-Na'im" },
+//     { name: 'Asrama Tasawwuf' },
+//     { name: 'Asrama Illiyyin' },
+//     { name: 'Asrama Takhossus' },
+//     { name: 'Asrama Darussalam' },
+//     { name: 'Asrama Darul Musthofa' },
+//     { name: "Asrama Al-Ma'wa" },
+//     { name: 'Dep. Pesanggrahan' },
+//   ]
 
-  const updated = await prisma.pengurus.createMany({
+//   const updated = await prisma.pengurus.createMany({
+//     data,
+//   })
+
+//   console.log(`${updated.count} records updated.`)
+// }
+
+// createPengurus()
+//   .then(() => console.log('create pengurus successful'))
+//   .catch((e) => console.error(e))
+//   .finally(async () => {
+//     await prisma.$disconnect()
+//   })
+
+const createKelasBaru = async () => {
+  const data = [
+    { name: 'RAYHAN AZAM IRFAI', kelasId: 377, asramaId: 49 },
+    { name: 'MUHAMMAD BAGASKARA PRAMATA RAHAGI', kelasId: 377, asramaId: 49 },
+    { name: 'MUGHNI NUR IRHAM ARIFIN', kelasId: 377, asramaId: 49 },
+    { name: 'ILYU SURURIN', kelasId: 377, asramaId: 49 },
+    { name: 'IBRAHIM QODIR', kelasId: 377, asramaId: 49 },
+    { name: 'AFA AHMAD ZIDNA FAHMI', kelasId: 377, asramaId: 49 },
+    { name: 'MUHAMMAD CAESAR HARIS', kelasId: 377, asramaId: 49 },
+    { name: 'AHMAD FUAD HABIB', kelasId: 377, asramaId: 49 },
+    { name: 'MUSYAFA AL FIKAR', kelasId: 377, asramaId: 49 },
+    { name: 'ABYAN IBNU ZAHRAN', kelasId: 377, asramaId: 49 },
+    { name: 'FAISHAL RIZKY MUZZAKI', kelasId: 377, asramaId: 49 },
+    { name: 'ATTABIK AZIZI', kelasId: 377, asramaId: 49 },
+    { name: 'RACHMAT AKBARI', kelasId: 377, asramaId: 49 },
+    { name: 'MUHAMMAD EZIRA HAYYIM ALIE', kelasId: 377, asramaId: 49 },
+    {
+      name: "MUHAMMAD MUTABAHHIRUL ULUM AL MA'SHUM",
+      kelasId: 377,
+      asramaId: 49,
+    },
+    { name: 'MUHAMMAD REZKY MAULANA ALI', kelasId: 377, asramaId: 49 },
+    { name: 'ABDUL HASANI', kelasId: 377, asramaId: 49 },
+    { name: 'MUHAMMAD SHOFIH AFAFA', kelasId: 377, asramaId: 49 },
+    { name: 'MUHAMMAD IHSAN', kelasId: 377, asramaId: 49 },
+  ]
+  const updated = await prisma.siswa.createMany({
     data,
   })
 
   console.log(`${updated.count} records updated.`)
 }
 
-createPengurus()
+createKelasBaru()
   .then(() => console.log('create pengurus successful'))
   .catch((e) => console.error(e))
   .finally(async () => {

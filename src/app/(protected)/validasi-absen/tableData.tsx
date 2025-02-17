@@ -88,7 +88,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
       data: [],
     })
   const [query, setQuery] = useState('')
-  const { session } = useCurrentSession()
+  const { session, status } = useCurrentSession()
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [kelasId, setKelasId] = useState<number | null>(null)
@@ -100,6 +100,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
   const { toast } = useToast()
 
   useEffect(() => {
+    if (status === 'loading') return
     const timeZone = 'Asia/Jakarta'
 
     const updateCountdown = () => {
@@ -128,7 +129,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
     const interval = setInterval(updateCountdown, 1000)
 
     return () => clearInterval(interval)
-  }, [session?.user?.role])
+  }, [session?.user?.role, status])
   const handleCheckboxChange = (
     jamAbsensiId: number,
     siswaId: number,
