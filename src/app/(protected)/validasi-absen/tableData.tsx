@@ -105,7 +105,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
     const updateCountdown = () => {
       const now = toZonedTime(new Date(), timeZone)
       const target = new Date(now)
-      target.setHours(14, 0, 0, 0)
+      target.setHours(17, 0, 0, 0)
 
       const diff = target.getTime() - now.getTime()
 
