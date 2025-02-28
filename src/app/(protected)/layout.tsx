@@ -16,8 +16,8 @@ import {
 } from '@/components/ui/breadcrumb'
 
 export const metadata: Metadata = {
-  title: 'Absensi Digital PPDF',
-  description: 'Absensi Digital PPDF',
+  title: 'SIGAP',
+  description: 'Sistem Digital Absensi PPDF',
 }
 
 export default function RootLayout({

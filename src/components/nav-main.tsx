@@ -118,8 +118,12 @@
 
 import {
   BoxIcon,
+  HousePlus,
   ReceiptPoundSterlingIcon,
   SearchCheck,
+  Shield,
+  ShieldEllipsis,
+  Stethoscope,
   Upload,
   UsersIcon,
   type LucideIcon,
@@ -163,6 +167,41 @@ export function NavMain({
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}
+      </SidebarMenu>
+      <SidebarGroupLabel>Perizinan</SidebarGroupLabel>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild>
+            <Link href={'/izin-asrama'} onClick={() => setOpenMobile(false)}>
+              <HousePlus />
+              <span>Izin Asrama</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild>
+            <Link href={'/izin-keamanan'} onClick={() => setOpenMobile(false)}>
+              <ShieldEllipsis />
+              <span>Izin Keamanan</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild>
+            <Link href={'/izin-kesehatan'} onClick={() => setOpenMobile(false)}>
+              <Stethoscope />
+              <span>Izin Kesehatan</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild>
+            <Link href={'/izin-komdis'} onClick={() => setOpenMobile(false)}>
+              <Shield />
+              <span>Izin Komdis</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
       </SidebarMenu>
 
       {/* Master Section - Hanya untuk ADMIN dan USER */}

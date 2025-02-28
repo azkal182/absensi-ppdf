@@ -82,3 +82,25 @@ export const updateSantri = async (
     return { error: 'error updating user' }
   }
 }
+
+export const getSantriByName = async (query: string, pengurus?: boolean) => {
+  return await prisma.siswa.findMany({
+    where: {
+      name: {
+        contains: query,
+        mode: 'insensitive',
+      },
+      ...(pengurus === true
+        ? { pengurusId: { not: null } }
+        : pengurus === false
+          ? { pengurusId: null }
+          : {}),
+      kelasId: { not: null },
+    },
+    include: {
+      asrama: true,
+      kelas: true,
+    },
+    take: 20,
+  })
+}

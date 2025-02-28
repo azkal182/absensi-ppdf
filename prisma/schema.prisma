@@ -23,6 +23,7 @@ model User {
 
     absensis   Absensi[]
     UserAsrama UserAsrama[] // Menghubungkan user dengan asrama
+    Izin       Izin[]
 
     @@map("user")
 }
@@ -94,6 +95,8 @@ model Siswa {
     pengurusId Int?
     pengurus   Pengurus? @relation(fields: [pengurusId], references: [id])
 
+    izin Izin[]
+
     @@unique([name, kelasId])
     @@index([kelasId])
     @@map("siswa")
@@ -162,4 +165,32 @@ model Pengurus {
     name String
 
     Siswa Siswa[]
+}
+
+model Izin {
+    id          Int       @id @default(autoincrement())
+    description String
+    jamKe       Int[]
+    startDate   DateTime
+    endDate     DateTime?
+    onlyOneDay  Boolean
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    izinStatus  IzinEnum  @default(SAKIT)
+    uks         Boolean   @default(false)
+    komdis      Boolean   @default(false)
+    keamanan    Boolean   @default(false)
+
+    siswa   Siswa? @relation(fields: [siswaId], references: [id])
+    siswaId Int?
+    userId  Int
+    user    User?  @relation(fields: [userId], references: [id])
+
+    @@index([startDate, onlyOneDay, endDate])
+}
+
+enum IzinEnum {
+    SAKIT
+    PULANG
+    IZIN
 }

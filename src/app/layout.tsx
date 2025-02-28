@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import ProressBarProviders from '@/components/progress-bar-provider'
+import Providers from './provider'
 // const geistSans = Geist({
 //   variable: '--font-geist-sans',
 //   subsets: ['latin'],
@@ -18,8 +19,8 @@ import ProressBarProviders from '@/components/progress-bar-provider'
 // })
 
 export const metadata: Metadata = {
-  title: 'Absensi digital PPDF',
-  description: 'Absensi digital PPDF',
+  title: 'SIGAP',
+  description: 'Sistem Digital Absensi PPDF',
 }
 
 export default function RootLayout({
@@ -32,10 +33,12 @@ export default function RootLayout({
       <body
       // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ProressBarProviders>
-          {children}
-          <Toaster />
-        </ProressBarProviders>
+        <Providers>
+          <ProressBarProviders>
+            {children}
+            <Toaster />
+          </ProressBarProviders>
+        </Providers>
       </body>
     </html>
   )

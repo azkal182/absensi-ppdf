@@ -10,8 +10,8 @@ export function TeamSwitcher() {
         <GalleryVerticalEnd className="size-4" />
       </div>
       <div className="grid flex-1 text-left text-sm leading-tight">
-        <span className="truncate font-semibold">PPDF</span>
-        <span className="truncate text-xs">Absensi</span>
+        <span className="truncate font-semibold">SIGAP</span>
+        <span className="truncate text-xs">Absensi PPDF</span>
       </div>
       <ChevronsUpDown className="ml-auto" />
     </div>

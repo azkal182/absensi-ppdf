@@ -40,14 +40,69 @@ export async function getClassByAsramaId(asramaId: number) {
 
 // GET: Ambil data Asrama, Kelas, dan Siswa
 export async function getDataByKelasId(kelasId: number) {
+  const today = new Date()
+  const startOfDay = new Date(today.setHours(0, 0, 0, 0)) // 00:00:00
+  const endOfDay = new Date(today.setHours(23, 59, 59, 999)) // 23:59:59
   try {
     const siswa = await prisma.siswa.findMany({
       where: {
         kelasId,
       },
+      include: {
+        izin: {
+          where: {
+            OR: [
+              // izin hanya sehari
+              {
+                startDate: {
+                  gte: startOfDay,
+                  lt: endOfDay,
+                },
+                onlyOneDay: true,
+              },
+              // izin berlaku dengan tanggal selesai tidak ditentukan
+              {
+                // startDate: new Date(),
+                endDate: null,
+              },
+              // izin tanggal dengan range
+            ],
+          },
+          orderBy: {
+            startDate: 'desc',
+          },
+        },
+      },
     })
 
-    return siswa
+    const formattedSiswaList = siswa.map((siswa) => ({
+      ...siswa,
+      izin:
+        siswa.izin.length > 0
+          ? (({
+              id,
+              description,
+              jamKe,
+              startDate,
+              endDate,
+              onlyOneDay,
+              izinStatus,
+            }) => ({
+              id,
+              description,
+              jamKe,
+              startDate,
+              endDate,
+              onlyOneDay,
+              izinStatus,
+            }))(siswa.izin[0]) // Ambil izin pertama
+          : null, // Jika izin kosong, set null
+    }))
+
+    console.log(JSON.stringify(formattedSiswaList, null, 2))
+    console.log(new Date())
+
+    return formattedSiswaList
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return []
@@ -945,7 +1000,7 @@ export async function getDaftarAlfa() {
       })),
     }))
 
-    console.log(JSON.stringify(result, null, 2))
+    // console.log(JSON.stringify(result, null, 2))
 
     return result
   } catch (error) {

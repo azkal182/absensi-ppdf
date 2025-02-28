@@ -250,7 +250,7 @@ export async function sendAbsensiReportById(id: number) {
     if (!Array.isArray(result) || result.length === 0) {
       throw new Error('Data tidak tersedia atau terjadi kesalahan.')
     }
-    console.log(JSON.stringify(result, null, 2))
+    // console.log(JSON.stringify(result, null, 2))
 
     // 🔹 Ambil daftar nomor WhatsApp & Telegram
     const listJid = await getReportWhatsapp()
@@ -314,6 +314,8 @@ export async function sendAbsensiReportById(id: number) {
           }),
         },
       }))
+
+    console.log(messageText.trim())
 
     // 🔹 Kirim pesan secara paralel
     await Promise.all([

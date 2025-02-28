@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Absensi PPDF',
-    short_name: 'AbsensiPPDF',
-    description: 'Absensi PPDF',
+    name: 'SIGAP',
+    short_name: 'SIGAP',
+    description: 'Sistem Digital Absensi PPDF',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
