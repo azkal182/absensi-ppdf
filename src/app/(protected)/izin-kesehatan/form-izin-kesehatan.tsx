@@ -119,7 +119,7 @@ export function FormIzinKesehatan() {
                     {selectedSantri ? selectedSantri.name : 'Pilih santri...'}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
+                <PopoverContent className="max-h-[170] w-full overflow-y-auto p-0">
                   <Command shouldFilter={false}>
                     <CommandInput
                       id="search"

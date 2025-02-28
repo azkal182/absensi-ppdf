@@ -18,7 +18,7 @@ model User {
     username String     @unique
     name     String
     password String
-    role     RoleUser?  @default(USER) // Enum tetap dipertahankan
+    role     RoleUser?  @default(USER)
     roles    UserRole[]
 
     absensis   Absensi[]
