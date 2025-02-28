@@ -138,7 +138,7 @@ export function SantriCombobox() {
                     {selectedSantri ? selectedSantri.name : 'Pilih santri...'}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="max-h-[170] w-full overflow-y-auto p-0">
+                <PopoverContent className="max-h-44 w-full overflow-y-auto p-0">
                   <Command shouldFilter={false}>
                     <CommandInput
                       id="search"
