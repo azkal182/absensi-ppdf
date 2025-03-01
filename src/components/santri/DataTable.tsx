@@ -298,7 +298,7 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
-    getRowId: (row) => row.id,
+    // getRowId: (row) => row.id,
     state: {
       columnFilters,
       columnVisibility: {
