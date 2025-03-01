@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
 import { toZonedTime } from 'date-fns-tz'
 
-export const dynamic = 'force-dynamic'
+// export const dynamic = 'force-dynamic'
 // const dynamic = 'force-dynamic'
 
 export default async function Home() {
