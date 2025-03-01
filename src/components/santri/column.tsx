@@ -90,6 +90,7 @@ import {
 import { Button } from '../ui/button'
 import { MoreHorizontal } from 'lucide-react'
 import { SantriWithRelations } from '@/actions/santri'
+import { Checkbox } from '../ui/checkbox'
 
 // export type Santri = {
 //   id: number
@@ -117,14 +118,40 @@ export const getColumns = ({
   onOpenModal,
 }: ColumnsProps): ColumnDef<SantriWithRelations>[] => [
   {
-    accessorKey: 'id',
-    header: 'Id',
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && 'indeterminate')
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+        className="translate-y-[2px]"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+        className="translate-y-[2px]"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
   },
   {
     accessorKey: 'asramaId',
     header: 'Asrama ID',
     enableHiding: true,
     accessorFn: (row) => (row?.asramaId ? row?.asramaId.toString() : ''), // Konversi ke string
+  },
+  {
+    accessorKey: 'id',
+    header: 'ID',
+    enableHiding: true,
+    accessorFn: (row) => row?.id,
   },
   {
     accessorKey: 'kelasId',
