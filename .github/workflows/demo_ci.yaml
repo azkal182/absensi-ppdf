@@ -29,10 +29,10 @@ jobs:
       - name: Print DATABASE_URL
         run: echo ${{ secrets.DATABASE_URL }}
 
-      - name: Run Prisma Migrations
-        env:
-          DATABASE_URL: 'postgresql://azkal:azkal@178.128.116.214:5432/absensi?schema=public'
-        run: npx prisma migrate deploy || sleep 10 && npx prisma migrate deploy
+      #   - name: Run Prisma Migrations
+      #     env:
+      #       DATABASE_URL: 'postgresql://azkal:azkal@178.128.116.214:5432/absensi?schema=public'
+      #     run: npx prisma migrate deploy || sleep 10 && npx prisma migrate deploy
 
       - name: Build Next.js application
         env:
