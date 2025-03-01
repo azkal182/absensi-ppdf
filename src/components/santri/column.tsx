@@ -121,6 +121,19 @@ export const getColumns = ({
     header: 'Id',
   },
   {
+    accessorKey: 'asramaId',
+    header: 'Asrama ID',
+    enableHiding: true,
+    accessorFn: (row) => (row?.asramaId ? row?.asramaId.toString() : ''), // Konversi ke string
+  },
+  {
+    accessorKey: 'kelasId',
+    header: 'Kelas ID',
+    enableHiding: true,
+    accessorFn: (row) => (row?.kelasId ? row?.kelasId.toString() : ''), // Konversi ke string
+  },
+
+  {
     accessorKey: 'name',
     header: 'Name',
   },
