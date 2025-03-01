@@ -347,15 +347,21 @@ export async function getDaftarAbsen(
   month: number
 ): Promise<Absensi[] | { error: string }> {
   try {
-    // Create UTC start and end dates for the given month and year
-    const startDate = new Date(Date.UTC(year, month - 1, 1)) // 1st day of the month in UTC
-    const endDate = new Date(Date.UTC(year, month, 0)) // Last day of the month in UTC
+    // Awal bulan di zona WIB (1 Maret 2025 00:00 WIB)
+    const startOfMonthWIB = new Date(year, month - 1, 1, 0, 0, 0)
+    const startDateUTC = new Date(
+      startOfMonthWIB.getTime() - 7 * 60 * 60 * 1000
+    ) // Kurangi 7 jam
+
+    // Akhir bulan di zona WIB (31 Maret 2025 23:59:59 WIB)
+    const endOfMonthWIB = new Date(year, month, 0, 23, 59, 59)
+    const endDateUTC = new Date(endOfMonthWIB.getTime() - 7 * 60 * 60 * 1000) // Kurangi 7 jam
 
     const absensiList = await prisma.absensi.findMany({
       where: {
         date: {
-          gte: startDate.toISOString(),
-          lte: endDate.toISOString(),
+          gte: startDateUTC.toISOString(),
+          lte: endDateUTC.toISOString(),
         },
         siswa: {
           kelasId,
