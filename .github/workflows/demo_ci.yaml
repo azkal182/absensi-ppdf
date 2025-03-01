@@ -106,7 +106,7 @@ jobs:
               sed -i '/^AUTH_SECRET=/d' .env
               echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}" >> .env
 
-              sed -i '/^AUTH_SECRET=/d' .env
+              sed -i '/^SENTRY_AUTH_TOKEN=/d' .env
               echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env
 
 
