@@ -1,0 +1,118 @@
+name: CI/CD Absensi demo
+
+on:
+  push:
+    branches:
+      - integrate-sentry
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Print current branch
+        run: echo ${{ github.ref }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Print DATABASE_URL
+        run: echo ${{ secrets.DATABASE_URL }}
+
+      - name: Run Prisma Migrations
+        env:
+          DATABASE_URL: 'postgresql://azkal:azkal@178.128.116.214:5432/absensi?schema=public'
+        run: npx prisma migrate deploy || sleep 10 && npx prisma migrate deploy
+
+      - name: Build Next.js application
+        env:
+          DATABASE_URL: 'postgresql://azkal:azkal@178.128.116.214:5432/absensi?schema=public'
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          NEXTAUTH_URL: 'https://demo.amtsilatipusat.com'
+          AUTH_TRUST_HOST: 'https://demo.amtsilatipusat.com'
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: pnpm build
+
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_DEMO }}
+
+      - name: Add server to known_hosts
+        run: ssh-keyscan 178.128.116.214 >> ~/.ssh/known_hosts
+
+      - name: Deploy to VPS
+        run: |
+          ssh -tt root@178.128.116.214 << 'EOF'
+              # Verifikasi apakah direktori /home/root/project/absensi-ppdf ada
+              if [ ! -d "/home/root/project/absensi-ppdf" ]; then
+              echo "Directory /home/root/project/absensi-ppdf does not exist. Cloning project..."
+              git clone https://github.com/azkal182/absensi-ppdf.git /home/root/project/absensi-ppdf
+              cd /home/root/project/absensi-ppdf
+              git checkout integrate-sentry
+              else
+              echo "Directory /home/root/project/absensi-ppdf exists. Pulling latest changes..."
+              cd /home/root/project/absensi-ppdf
+              git checkout integrate-sentry
+              git pull origin integrate-sentry
+              fi
+              exit
+          EOF
+
+      - name: Copy build files to VPS
+        run: |
+          rsync -avz --delete .next/ root@178.128.116.214:/home/root/project/absensi-ppdf/.next/
+          rsync -avz --delete public/ root@178.128.116.214:/home/root/project/absensi-ppdf/public/
+          rsync -avz --delete package.json pnpm-lock.yaml root@178.128.116.214:/home/root/project/absensi-ppdf/
+
+      - name: Install Dependencies and Restart App
+        run: |
+          ssh -tt root@178.128.116.214 << 'EOF'
+              # Masuk ke direktori project
+              cd /home/root/project/absensi-ppdf
+
+              # Hentikan aplikasi yang berjalan (jika menggunakan PM2)
+              if pm2 describe absensi > /dev/null; then
+              pm2 stop absensi
+              pm2 delete absensi
+              else
+              echo "PM2 application 'absensi' not found, skipping stop."
+              fi
+
+              # Install dependencies tanpa build
+              pnpm install --production
+
+              # Update variabel di file .env
+              sed -i '/^DATABASE_URL=/d' .env
+              echo "DATABASE_URL=\"postgresql://azkal:azkal@localhost:5432/absensi?schema=public\"" >> .env
+
+
+              sed -i '/^NEXTAUTH_URL=/d' .env
+              echo "NEXTAUTH_URL=\"https://demo.amtsilatipusat.com\"" >> .env
+
+              sed -i '/^AUTH_TRUST_HOST=/d' .env
+              echo "AUTH_TRUST_HOST=\"https://demo.amtsilatipusat.com\"" >> .env
+
+              sed -i '/^AUTH_SECRET=/d' .env
+              echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}" >> .env
+
+              sed -i '/^AUTH_SECRET=/d' .env
+              echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env
+
+
+              # Restart aplikasi dengan PM2 tanpa build
+              pm2 start npm --name "absensi" -- start -- -p 3000
+
+              # Keluar dari SSH
+              exit
+          EOF
