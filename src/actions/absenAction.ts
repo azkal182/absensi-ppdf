@@ -585,8 +585,10 @@ export const getKelasById = async (kelasId: number) => {
 
 export async function getChartThisMonth() {
   try {
-    const startDate = new Date(2025, 2 - 1, 1)
-    const endDate = new Date(2025, 2, 0)
+    const now = new Date()
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+
     const absensiByAsrama = await prisma.asrama.findMany({
       include: {
         Absensi: {
@@ -605,6 +607,8 @@ export async function getChartThisMonth() {
     })
 
     const formattedResult = absensiByAsrama.map((asrama) => {
+      console.log(asrama)
+
       const statusCount = asrama.Absensi.reduce(
         (acc, absen) => {
           acc[absen.status] = (acc[absen.status] || 0) + 1
