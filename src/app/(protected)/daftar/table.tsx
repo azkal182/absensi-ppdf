@@ -617,11 +617,15 @@ export default function AbsensiTable() {
                 <SelectValue placeholder="Pilih Kelas" />
               </SelectTrigger>
               <SelectContent>
-                {kelas.map(({ id, name, teacher }) => (
-                  <SelectItem key={id} value={id.toString()}>
-                    {name} - {teacher}
-                  </SelectItem>
-                ))}
+                {kelas.length > 0 ? (
+                  kelas.map((item) => (
+                    <SelectItem key={item.id} value={item.id.toString()}>
+                      {item.name} - {item.teacher}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="kelas">Tidak ada kelas</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>

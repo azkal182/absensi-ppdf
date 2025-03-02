@@ -107,6 +107,7 @@ function isDisabled(
 
 const TableData = ({ asrama }: { asrama: AsramaProps }) => {
   const [asramaId, setAsramaId] = useState<number | undefined>()
+  const [loadingKelas, setLoadingKelas] = useState(false)
   const [kelas, setKelas] = useState<KelasData | []>([])
   const [siswa, setSiswa] = useState<SiswaData[]>([])
   const [dialog, setDialog] = useState(false)
@@ -146,15 +147,20 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
   }
 
   const handleChangeAsrama = async (asramaId: string) => {
+    setLoadingKelas(true)
     const id = parseInt(asramaId)
     try {
       setAsramaId(id)
       const result = await getClassByAsramaId(id)
       setKelas(result)
+      setSiswa([])
       setSelectedAttendance((prev) => ({
         ...prev,
         asramaId: id,
+        data: [],
       }))
+
+      setLoadingKelas(false)
     } catch (error) {
       alert(error)
     }
@@ -293,16 +299,22 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
 
         <div>
           <Label>Kelas</Label>
-          <Select onValueChange={handleChangeKelas}>
+          <Select disabled={loadingKelas} onValueChange={handleChangeKelas}>
             <SelectTrigger className="w-full md:w-[300px]">
-              <SelectValue placeholder="Pilih Kelas" />
+              <SelectValue
+                placeholder={loadingKelas ? 'Memuat kelas...' : 'Pilih Kelas'}
+              />
             </SelectTrigger>
             <SelectContent>
-              {kelas.map((item, index) => (
-                <SelectItem key={index} value={item.id.toString()}>
-                  {item.name} - {item.teacher}
-                </SelectItem>
-              ))}
+              {kelas.length > 0 ? (
+                kelas.map((item) => (
+                  <SelectItem key={item.id} value={item.id.toString()}>
+                    {item.name} - {item.teacher}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="kelas">Tidak ada kelas</SelectItem>
+              )}
             </SelectContent>
           </Select>
         </div>
