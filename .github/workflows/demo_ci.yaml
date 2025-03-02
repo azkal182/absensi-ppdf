@@ -36,7 +36,7 @@ jobs:
 
       - name: Build Next.js application
         env:
-          DATABASE_URL: 'postgresql://azkal:azkal@178.128.116.214:5432/absensi?schema=public'
+          DATABASE_URL: 'postgresql://azkal:azkal@165.22.106.176:5432/absensi?schema=public'
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           NEXTAUTH_URL: 'https://demo.amtsilatipusat.com'
           AUTH_TRUST_HOST: 'https://demo.amtsilatipusat.com'
@@ -94,7 +94,7 @@ jobs:
 
               # Update variabel di file .env
               sed -i '/^DATABASE_URL=/d' .env
-              echo "DATABASE_URL=\"postgresql://azkal:azkal@178.128.116.214:5432/absensi?schema=public\"" >> .env
+              echo "DATABASE_URL=\"postgresql://azkal:azkal@165.22.106.176:5432/absensi?schema=public\"" >> .env
 
 
               sed -i '/^NEXTAUTH_URL=/d' .env
