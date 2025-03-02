@@ -38,6 +38,7 @@ const PindahKelasBulkModal = ({
   onClose,
   asrama,
   asramaIds,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onSubmit,
 }: PindahKelasBulkModalProps) => {
   const { handleSubmit, setValue, watch, reset } = useForm<
@@ -87,6 +88,7 @@ const PindahKelasBulkModal = ({
     }
   }, [isOpen, reset])
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleFormSubmit = async (data: Partial<SantriWithRelations>) => {
     // onSubmit(data)
     console.log(asramaIds)
