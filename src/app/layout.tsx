@@ -4,6 +4,7 @@ import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import ProressBarProviders from '@/components/progress-bar-provider'
 import Providers from './provider'
+import Head from 'next/head'
 // const geistSans = Geist({
 //   variable: '--font-geist-sans',
 //   subsets: ['latin'],
@@ -29,7 +30,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" translate="no">
+      <Head>
+        <meta name="googlebot" content="notranslate" />
+        <meta name="google" content="notranslate" />
+      </Head>
       <body
       // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
