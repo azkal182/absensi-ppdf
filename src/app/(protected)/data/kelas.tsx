@@ -9,14 +9,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
   Table,
   TableBody,
   TableCell,
@@ -24,12 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Clipboard, MoreHorizontal, Pencil, Trash } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import EditKelasModal from './edit-kelas-modal'
 import { toast } from '@/hooks/use-toast'
 import { getAsrama } from '@/actions/absenAction'
-import KelasModal from './kelas-modal'
 
 type Kelas = {
   id: number
