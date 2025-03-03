@@ -878,14 +878,12 @@ export async function getDaftarAlfa() {
   try {
     // Ambil waktu saat ini dan ubah ke zona Asia/Jakarta
     const todayJakarta = toZonedTime(new Date(), 'Asia/Jakarta')
-    const yesterdayJakarta = subDays(todayJakarta, 1)
 
     // Set jam ke 00:00 di zona Jakarta
     todayJakarta.setHours(0, 0, 0, 0)
-    yesterdayJakarta.setHours(0, 0, 0, 0)
 
     // Konversi kembali ke UTC
-    const todayUtc = fromZonedTime(yesterdayJakarta, 'Asia/Jakarta')
+    const todayUtc = fromZonedTime(todayJakarta, 'Asia/Jakarta')
 
     const absensiAlfa = await prisma.absensi.findMany({
       where: {
