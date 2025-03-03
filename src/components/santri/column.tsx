@@ -131,10 +131,16 @@ export const getColumns = ({
       />
     ),
     cell: ({ row }) => (
+      //   <Checkbox
+      //     checked={row.getIsSelected()}
+      //     onCheckedChange={(value) => row.toggleSelected(!!value)}
+      //     aria-label="Select row"
+      //     className="translate-y-[2px]"
+      //   />
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label={`Select santri ${row.original.id}`}
         className="translate-y-[2px]"
       />
     ),

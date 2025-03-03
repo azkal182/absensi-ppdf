@@ -243,16 +243,18 @@ import {
 } from 'lucide-react'
 import PindahKelasBulkModal from './PindahKelasBulkModal'
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends { id: number }, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   onCreate: () => void
+  onUpdateBulk: () => void
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends { id: number }, TValue>({
   columns,
   data,
   onCreate,
+  onUpdateBulk,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [openModalCreate, setOpenModalCreate] = useState(false)
@@ -298,7 +300,7 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
-    // getRowId: (row) => row.id,
+    getRowId: (row) => row.id.toString(),
     state: {
       columnFilters,
       columnVisibility: {
@@ -330,9 +332,10 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center justify-between py-4">
-        <div>
-          <div className="flex items-center space-x-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 py-4">
+        {/* Filter Section */}
+        <div className="w-full md:w-auto">
+          <div className="flex flex-wrap items-center gap-4 md:flex-nowrap">
             <Input
               placeholder="Filter Nama..."
               value={
@@ -341,10 +344,10 @@ export function DataTable<TData, TValue>({
               onChange={(event) =>
                 table.getColumn('name')?.setFilterValue(event.target.value)
               }
-              className="max-w-sm"
+              className="w-full md:w-60"
             />
             <Select onValueChange={setSelectedAsrama}>
-              <SelectTrigger className="">
+              <SelectTrigger className="w-full md:w-40">
                 <SelectValue placeholder="Select asrama" />
               </SelectTrigger>
               <SelectContent>
@@ -356,7 +359,7 @@ export function DataTable<TData, TValue>({
               </SelectContent>
             </Select>
             <Select onValueChange={setSelectedKelas} disabled={!selectedAsrama}>
-              <SelectTrigger className="">
+              <SelectTrigger className="w-full md:w-40">
                 <SelectValue placeholder="Select Kelas" />
               </SelectTrigger>
               <SelectContent>
@@ -369,16 +372,13 @@ export function DataTable<TData, TValue>({
             </Select>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2 md:flex-nowrap">
           {table.getFilteredSelectedRowModel().rows.length > 0 && (
             <Button
               variant={'outline'}
-              onClick={() => {
-                // console.log(
-                //   table.getFilteredSelectedRowModel().rows.map((row) => row.id)
-                //
-                setPindahKelasBulkOpen(true)
-              }}
+              onClick={() => setPindahKelasBulkOpen(true)}
             >
               {table.getFilteredSelectedRowModel().rows.length} Santri Pindah
               kelas
@@ -387,6 +387,7 @@ export function DataTable<TData, TValue>({
           <Button onClick={() => setOpenModalCreate(true)}>Create</Button>
         </div>
       </div>
+
       <div className="rounded-md border">
         <Table className="w-full overflow-auto">
           <TableHeader>
@@ -540,12 +541,16 @@ export function DataTable<TData, TValue>({
 
       <PindahKelasBulkModal
         isOpen={PindahKelasBulkOpen}
-        asramaIds={table
+        santriIds={table
           .getFilteredSelectedRowModel()
           .rows.map((row) => Number(row.id))}
         onClose={closeModalPindahKelas}
         asrama={asramaList}
-        onSubmit={handleCreate}
+        // reset checkbox
+        onSubmit={() => {
+          onUpdateBulk()
+          table.resetRowSelection()
+        }}
       />
 
       <CreateSantriModal

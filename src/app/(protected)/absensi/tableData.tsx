@@ -406,7 +406,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
         />
       </div>
 
-      <div className="sticky top-0 z-10 w-full bg-background">
+      {/* <div className="sticky top-0 z-10 w-full bg-background">
         <Table>
           <TableHeader className="bg-gray-200">
             <TableRow>
@@ -419,8 +419,18 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
             </TableRow>
           </TableHeader>
         </Table>
-      </div>
+      </div> */}
       <Table className="overflow-hidden rounded-lg border border-gray-300">
+        <TableHeader className="bg-gray-200">
+          <TableRow>
+            <TableHead className="w-[50px] text-center">No</TableHead>
+            <TableHead>Nama</TableHead>
+            <TableHead className="md:w-16">Hadir</TableHead>
+            <TableHead className="md:w-16">Izin</TableHead>
+            <TableHead className="md:w-16">Sakit</TableHead>
+            <TableHead className="md:w-16">Alfa</TableHead>
+          </TableRow>
+        </TableHeader>
         <TableCaption>Daftar Kehadiran Siswa</TableCaption>
         <TableBody>
           {filteredSiswa?.map((item, index) => {

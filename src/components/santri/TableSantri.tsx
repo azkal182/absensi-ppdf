@@ -82,6 +82,7 @@ const TableSantri = () => {
           onCreate={loadSantri}
           columns={columns}
           data={santris ?? []}
+          onUpdateBulk={loadSantri}
         />
       </Card>
 

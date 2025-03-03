@@ -15,6 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import TableSantri from '@/components/santri/TableSantri'
+import KelasComponent from './kelas'
 // import { usePathname, useSearchParams } from 'next/navigation'
 // import Link from 'next/link'
 
@@ -47,9 +48,9 @@ const DataPage = () => {
     <div>
       {/* <Link href={pathname + '?' + createQueryString('test', '4')}>test</Link> */}
       <Tabs defaultValue="asrama" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="asrama">Asrama</TabsTrigger>
-          {/* <TabsTrigger value="kelas">Kelas</TabsTrigger> */}
+          <TabsTrigger value="kelas">Kelas</TabsTrigger>
           <TabsTrigger value="santri">Santri</TabsTrigger>
         </TabsList>
         <TabsContent value="asrama">
@@ -118,29 +119,9 @@ const DataPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        {/* <TabsContent value="kelas">
-          <Card>
-            <CardHeader>
-              <CardTitle>Password</CardTitle>
-              <CardDescription>
-                Change your password here. After saving, youll be logged out.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="space-y-1">
-                <Label htmlFor="current">Current password</Label>
-                <Input id="current" type="password" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="new">New password</Label>
-                <Input id="new" type="password" />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>Save password</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent> */}
+        <TabsContent value="kelas">
+          <KelasComponent />
+        </TabsContent>
         <TabsContent value="santri">
           <TableSantri />
         </TabsContent>

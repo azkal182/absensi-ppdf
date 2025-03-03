@@ -7,6 +7,7 @@ import {
   CreateSantriSchema,
   UpdateSantriInput,
 } from '@/schemas/santriSchema'
+// import { revalidatePath } from 'next/cache'
 
 export type SantriWithRelations = Prisma.SiswaGetPayload<{
   include: {
@@ -103,4 +104,31 @@ export const getSantriByName = async (query: string, pengurus?: boolean) => {
     },
     take: 20,
   })
+}
+
+export type SantriBulkUpdate = {
+  id: number[]
+  kelasId: number
+  asramaId: number
+}
+
+export const pindahKelasBulk = async ({ data }: { data: SantriBulkUpdate }) => {
+  try {
+    const result = await prisma.siswa.updateMany({
+      where: {
+        id: {
+          in: data.id,
+        },
+      },
+      data: {
+        asramaId: data.asramaId,
+        kelasId: data.kelasId,
+      },
+    })
+
+    return { message: 'success', data: result }
+  } catch (error) {
+    console.log(error)
+    return { error: 'error updating user' }
+  }
 }
