@@ -41,7 +41,8 @@ import {
 import {
   createReportWhatsapp,
   deleteReportWhatsapp,
-  sendAbsensiReport,
+  generatePdf,
+  //   sendAbsensiReport,
   sendAbsensiReportById,
   updateReportWhatsapp,
 } from '@/actions/report_whatsapp'
@@ -159,29 +160,34 @@ const TableReport = ({ data }: { data: any }) => {
         title: 'Sukses',
         description: 'Data berhasil dikirim',
       })
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Gagal',
-        description: error,
+        description: 'Data Gagal dikirim',
       })
     }
   }
 
+  //   const sentAllReport = async () => {
+  //     try {
+  //       await sendAbsensiReport()
+  //       toast({
+  //         title: 'Sukses',
+  //         description: 'Data berhasil dikirim',
+  //       })
+  //     } catch (error: any) {
+  //       toast({
+  //         variant: 'destructive',
+  //         title: 'Gagal',
+  //         description: error,
+  //       })
+  //     }
+  //   }
+
   const sentAllReport = async () => {
-    try {
-      await sendAbsensiReport()
-      toast({
-        title: 'Sukses',
-        description: 'Data berhasil dikirim',
-      })
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Gagal',
-        description: error,
-      })
-    }
+    await generatePdf()
   }
 
   return (

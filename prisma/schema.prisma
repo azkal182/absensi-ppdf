@@ -94,6 +94,7 @@ model Siswa {
     asrama     Asrama?   @relation(fields: [asramaId], references: [id])
     pengurusId Int?
     pengurus   Pengurus? @relation(fields: [pengurusId], references: [id])
+    status     Boolean   @default(true)
 
     izin Izin[]
 

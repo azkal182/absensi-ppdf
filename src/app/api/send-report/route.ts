@@ -127,14 +127,15 @@
 // }
 
 import { NextResponse } from 'next/server'
-import { sendAbsensiReport } from '@/actions/report_whatsapp'
+import { generatePdf } from '@/actions/report_whatsapp'
 
 // 🔹 Mengirim laporan absensi ke WhatsApp & Telegram
 
 // 🔹 API Handler (GET)
 export async function GET() {
   try {
-    const response = await sendAbsensiReport()
+    // const response = await sendAbsensiReport()
+    const response = await generatePdf()
     return NextResponse.json(response)
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })

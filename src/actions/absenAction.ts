@@ -3,6 +3,7 @@
 import { SelectedAttendance } from '@/app/(protected)/absensi/tableData'
 import prisma from '@/lib/prisma'
 import { StatusAbsen } from '@prisma/client'
+import { subDays } from 'date-fns'
 import { fromZonedTime, toZonedTime } from 'date-fns-tz'
 
 // const TIMEZONE = process.env.NEXT_PUBLIC_TIMEZONE as string;
@@ -877,12 +878,14 @@ export async function getDaftarAlfa() {
   try {
     // Ambil waktu saat ini dan ubah ke zona Asia/Jakarta
     const todayJakarta = toZonedTime(new Date(), 'Asia/Jakarta')
+    const yesterdayJakarta = subDays(todayJakarta, 1)
 
     // Set jam ke 00:00 di zona Jakarta
     todayJakarta.setHours(0, 0, 0, 0)
+    yesterdayJakarta.setHours(0, 0, 0, 0)
 
     // Konversi kembali ke UTC
-    const todayUtc = fromZonedTime(todayJakarta, 'Asia/Jakarta')
+    const todayUtc = fromZonedTime(yesterdayJakarta, 'Asia/Jakarta')
 
     const absensiAlfa = await prisma.absensi.findMany({
       where: {
@@ -1010,7 +1013,7 @@ export async function getDaftarAlfa() {
       })),
     }))
 
-    // console.log(JSON.stringify(result, null, 2))
+    console.log(JSON.stringify(result))
 
     return result
   } catch (error) {
