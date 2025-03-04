@@ -653,7 +653,7 @@ export default function AbsensiTable() {
             <h2 className="mb-4 text-lg font-semibold">Minggu {week}</h2>
             <Table className="overflow-x-auto">
               <TableHeader>
-                <TableRow className="bg-gray-200 text-sm text-gray-700">
+                <TableRow className="">
                   <TableHead rowSpan={2} className="border p-2 text-center">
                     No
                   </TableHead>
@@ -671,7 +671,7 @@ export default function AbsensiTable() {
                   ))}
                 </TableRow>
 
-                <TableRow className="bg-gray-200 text-sm text-gray-700">
+                <TableRow className="">
                   {days.flatMap(({ date }) => [
                     <TableHead
                       key={`day-${date}-1`}

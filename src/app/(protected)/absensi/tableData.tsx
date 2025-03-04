@@ -377,7 +377,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
         </div>
       </div>
 
-      <div className="my-6 rounded-lg bg-gray-100 p-4 shadow-md">
+      <div className="my-6 rounded-lg p-4 shadow-md">
         <div className="">
           <h3 className="text-center text-lg font-semibold">Rekap Kehadiran</h3>
           {selectedAttendance.kelasId && (
@@ -421,7 +421,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
         </Table>
       </div> */}
       <Table className="overflow-hidden rounded-lg border border-gray-300">
-        <TableHeader className="bg-gray-200">
+        <TableHeader className="bg-gray-200 dark:bg-slate-700">
           <TableRow>
             <TableHead className="w-[50px] text-center">No</TableHead>
             <TableHead>Nama</TableHead>

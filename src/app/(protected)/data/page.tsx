@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/table'
 import TableSantri from '@/components/santri/TableSantri'
 import KelasComponent from './kelas'
+import PageContainer from '@/components/layout/page-container'
 // import { usePathname, useSearchParams } from 'next/navigation'
 // import Link from 'next/link'
 
@@ -45,88 +46,95 @@ const DataPage = () => {
     fetchAsrama()
   }, [])
   return (
-    <div>
-      {/* <Link href={pathname + '?' + createQueryString('test', '4')}>test</Link> */}
-      <Tabs defaultValue="asrama" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="asrama">Asrama</TabsTrigger>
-          <TabsTrigger value="kelas">Kelas</TabsTrigger>
-          <TabsTrigger value="santri">Santri</TabsTrigger>
-        </TabsList>
-        <TabsContent value="asrama">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <h1>Asrama</h1>
-                <Button>Tambah</Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Table>
-                {/* <TableCaption>A list of your recent invoices.</TableCaption> */}
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">No</TableHead>
-                    <TableHead>Nama Asrama</TableHead>
-                    <TableHead className="text-right">Jumlah Kelas</TableHead>
-                    <TableHead className="text-right">Jumlah Santri</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {asrama?.map((data: any, index: number) => (
-                    <TableRow key={data.id}>
-                      <TableCell className="font-medium">{index + 1}</TableCell>
-                      <TableCell>{data.name}</TableCell>
-                      <TableCell className="text-right">
-                        {data._count.classes}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {data.classes.reduce(
-                          (sum: any, kelas: any) => sum + kelas._count.Siswas,
-                          0
-                        )}
-                      </TableCell>
+    <PageContainer>
+      <div className="flex max-w-[calc(100vw-2rem)] flex-1 flex-col gap-4 md:max-w-full">
+        {/* <Link href={pathname + '?' + createQueryString('test', '4')}>test</Link> */}
+        <Tabs defaultValue="asrama" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="asrama">Asrama</TabsTrigger>
+            <TabsTrigger value="kelas">Kelas</TabsTrigger>
+            <TabsTrigger value="santri">Santri</TabsTrigger>
+          </TabsList>
+          <TabsContent value="asrama">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <h1>Asrama</h1>
+                  <Button>Tambah</Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Table>
+                  {/* <TableCaption>A list of your recent invoices.</TableCaption> */}
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">No</TableHead>
+                      <TableHead>Nama Asrama</TableHead>
+                      <TableHead className="text-right">Jumlah Kelas</TableHead>
+                      <TableHead className="text-right">
+                        Jumlah Santri
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-                <TableFooter>
-                  <TableRow className="font-bold">
-                    <TableCell colSpan={2} className="text-center">
-                      Total
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {asrama.reduce(
-                        (sum: any, data: any) => sum + data.classes.length,
-                        0
-                      )}{' '}
-                      Kelas
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {asrama.reduce(
-                        (totalSantri: any, data: any) =>
-                          totalSantri +
-                          data.classes.reduce(
+                  </TableHeader>
+                  <TableBody>
+                    {asrama?.map((data: any, index: number) => (
+                      <TableRow key={data.id}>
+                        <TableCell className="font-medium">
+                          {index + 1}
+                        </TableCell>
+                        <TableCell>{data.name}</TableCell>
+                        <TableCell className="text-right">
+                          {data._count.classes}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {data.classes.reduce(
                             (sum: any, kelas: any) => sum + kelas._count.Siswas,
                             0
-                          ),
-                        0
-                      )}{' '}
-                      Santri
-                    </TableCell>
-                  </TableRow>
-                </TableFooter>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="kelas">
-          <KelasComponent />
-        </TabsContent>
-        <TabsContent value="santri">
-          <TableSantri />
-        </TabsContent>
-      </Tabs>
-    </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                  <TableFooter>
+                    <TableRow className="font-bold">
+                      <TableCell colSpan={2} className="text-center">
+                        Total
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {asrama.reduce(
+                          (sum: any, data: any) => sum + data.classes.length,
+                          0
+                        )}{' '}
+                        Kelas
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {asrama.reduce(
+                          (totalSantri: any, data: any) =>
+                            totalSantri +
+                            data.classes.reduce(
+                              (sum: any, kelas: any) =>
+                                sum + kelas._count.Siswas,
+                              0
+                            ),
+                          0
+                        )}{' '}
+                        Santri
+                      </TableCell>
+                    </TableRow>
+                  </TableFooter>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="kelas">
+            <KelasComponent />
+          </TabsContent>
+          <TabsContent value="santri">
+            <TableSantri />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </PageContainer>
   )
 }
 

@@ -1,6 +1,7 @@
 import { getChartThisMonth } from '@/actions/absenAction'
 import ChartThisMonth from './ChartThisMonth'
 import { BarChartPerAsrama } from './BarChartPerAsrama'
+import PageContainer from '@/components/layout/page-container'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,14 +9,15 @@ export default async function Page() {
   const thisMonth = await getChartThisMonth()
   //   console.log(JSON.stringify(thisMonth, null, 2))
   return (
-    <div className="flex flex-1 flex-col gap-4">
-      {/* <div className="grid grid-cols-4">
+    <PageContainer>
+      <div className="flex flex-1 flex-col gap-4">
+        {/* <div className="grid grid-cols-4">
 
       </div>
       <ChartBulanan /> */}
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <ChartThisMonth chartData={thisMonth} />
-        {/* <Card>
+        <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+          <ChartThisMonth chartData={thisMonth} />
+          {/* <Card>
           <CardHeader>
             <CardTitle>Grafik kehadiran </CardTitle>
             <CardDescription>January 2025</CardDescription>
@@ -70,13 +72,14 @@ export default async function Page() {
             </ChartContainer>
           </CardContent>
         </Card> */}
-        {/* <ChartGlobal /> */}
-        <div className="rounded-xl bg-muted/50" />
-        <div className="rounded-xl bg-muted/50" />
+          {/* <ChartGlobal /> */}
+          <div className="rounded-xl bg-muted/50" />
+          <div className="rounded-xl bg-muted/50" />
+        </div>
+        {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" /> */}
+        {/* <ChartBulanan /> */}
+        <BarChartPerAsrama data={thisMonth} />
       </div>
-      {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" /> */}
-      {/* <ChartBulanan /> */}
-      <BarChartPerAsrama data={thisMonth} />
-    </div>
+    </PageContainer>
   )
 }

@@ -2,9 +2,11 @@ import type { Metadata } from 'next'
 // import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
-import ProressBarProviders from '@/components/progress-bar-provider'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
+import NextTopLoader from 'nextjs-toploader'
 import Providers from './provider'
 import Head from 'next/head'
+import { auth } from '@/auth'
 // const geistSans = Geist({
 //   variable: '--font-geist-sans',
 //   subsets: ['latin'],
@@ -24,13 +26,15 @@ export const metadata: Metadata = {
   description: 'Sistem Digital Absensi PPDF',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const session = await auth()
+
   return (
-    <html lang="en" translate="no">
+    <html lang="en" translate="no" suppressHydrationWarning>
       <Head>
         <meta name="googlebot" content="notranslate" />
         <meta name="google" content="notranslate" />
@@ -38,12 +42,19 @@ export default function RootLayout({
       <body
       // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
+        {/* <Providers session={session}>
           <ProressBarProviders>
             {children}
             <Toaster />
           </ProressBarProviders>
-        </Providers>
+        </Providers> */}
+        <NextTopLoader showSpinner={false} />
+        <NuqsAdapter>
+          <Providers session={session}>
+            <Toaster />
+            {children}
+          </Providers>
+        </NuqsAdapter>
       </body>
     </html>
   )

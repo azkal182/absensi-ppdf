@@ -247,7 +247,7 @@ const TableReport = ({ data }: { data: any }) => {
                       </span>
                     )}
                   </TableCell>
-                  <TableCell className="space-x-2">
+                  <TableCell className="flex gap-2">
                     <Button size="sm" onClick={() => handleOpenModal(item)}>
                       Edit
                     </Button>
