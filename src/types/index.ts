@@ -34,6 +34,7 @@ export interface NavItem {
   description?: string
   isActive?: boolean
   items?: NavItem[]
+  roles?: string[]
 }
 
 export interface NavItemWithChildren extends NavItem {
