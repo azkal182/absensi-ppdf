@@ -121,7 +121,7 @@ export const generatePdf = async () => {
     asrama.kelas.forEach((kelas: Kelas) => {
       // Header Kelas
       ;(docDefinition.content as Content[]).push({
-        text: `Kelas: ${kelas.name} - Kelas: ${kelas.teacher}`,
+        text: `Kelas: ${kelas.name} - ${kelas.teacher}`,
         style: 'kelasHeader',
       })
 
