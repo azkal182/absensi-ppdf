@@ -39,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 
 export function FormIzinKeamanan() {
   const { session } = useCurrentSession()
@@ -49,7 +49,6 @@ export function FormIzinKeamanan() {
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedSantri, setSelectedSantri] = useState<any | null>(null)
   const [izin, setIzin] = useState('')
-  const { toast } = useToast()
   const [openJam, setOpenJam] = useState(false)
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]) // Mulai dengan array kosong
 
@@ -76,16 +75,10 @@ export function FormIzinKeamanan() {
         },
       })
       setModalOpen(false)
-      toast({
-        title: 'Success',
-        description: 'Izin berhasil dibuat',
-      })
+      toast.success('Izin berhasil dibuat')
     } catch (error) {
       // toast("'Error creating izin:')
-      toast({
-        title: 'Error',
-        description: 'Error creating izin',
-      })
+      toast.error('Error creating izin')
     }
   }
 

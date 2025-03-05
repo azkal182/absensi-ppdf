@@ -18,8 +18,8 @@ import {
 } from '@/components/ui/table'
 import React, { useEffect, useState } from 'react'
 import EditKelasModal from './edit-kelas-modal'
-import { toast } from '@/hooks/use-toast'
 import { getAsrama } from '@/actions/absenAction'
+import { toast } from 'sonner'
 
 type Kelas = {
   id: number
@@ -77,26 +77,16 @@ const KelasComponent = () => {
       //   @ts-ignore
       await updateKelas(data)
 
-      toast({
-        title: 'Berhasil',
-        description: 'Kelas berhasil diperbarui',
-      })
+      toast.success('Kelas berhasil diperbarui')
       fetchKelas()
     } else {
       // Mode Create: Tambah data baru
       createKelas(data).then((data) => {
         if (data.error) {
-          toast({
-            title: 'Gagal',
-            variant: 'destructive',
-            description: 'Kelas Gagal dibuat',
-          })
+          toast.error('Kelas Gagal dibuat')
         }
       })
-      toast({
-        title: 'Berhasil',
-        description: 'Kelas berhasil dibuat',
-      })
+      toast.success('Kelas berhasil dibuat')
       fetchKelas()
     }
     closeModal() // Panggil closeModal untuk konsistensi

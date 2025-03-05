@@ -39,9 +39,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
 import MultiSelectCombobox from './multi'
 import { MultiSelectJam } from '@/components/multi-select-jam'
+import { toast } from 'sonner'
 
 export function SantriCombobox() {
   const { session } = useCurrentSession()
@@ -51,7 +51,6 @@ export function SantriCombobox() {
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedSantri, setSelectedSantri] = useState<any | null>(null)
   const [izin, setIzin] = useState('')
-  const { toast } = useToast()
   const [openJam, setOpenJam] = useState(false)
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]) // Mulai dengan array kosong
 
@@ -67,10 +66,7 @@ export function SantriCombobox() {
   const handleSubmit = async () => {
     try {
       if (izin === '') {
-        toast({
-          title: 'Error',
-          description: 'Izin tidak boleh kosong',
-        })
+        toast.error('Izin tidak boleh kosong')
         return
       } else {
         await createIzin({
@@ -84,17 +80,11 @@ export function SantriCombobox() {
           },
         })
         setModalOpen(false)
-        toast({
-          title: 'Success',
-          description: 'Izin berhasil dibuat',
-        })
+        toast.success('Izin berhasil dibuat')
       }
     } catch (error) {
       // toast("'Error creating izin:')
-      toast({
-        title: 'Error',
-        description: 'Error creating izin',
-      })
+      toast.error('Izin gagal dibuat')
     }
   }
 

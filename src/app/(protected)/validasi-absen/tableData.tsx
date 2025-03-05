@@ -30,12 +30,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { useToast } from '@/hooks/use-toast'
 import { Label } from '@/components/ui/label'
 import SearchInput from '@/components/search-input'
 import { format, toZonedTime } from 'date-fns-tz'
 import { id } from 'date-fns/locale'
 import { useCurrentSession } from '@/hooks/useCurrentUser'
+import { toast } from 'sonner'
 
 export type AsramaProps = {
   name: string
@@ -96,8 +96,6 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
   const [isDisabled, setIsDisabled] = useState(false)
   const [listJam, setListJam] = useState<any[]>([])
   const [globalData, setGlobalData] = useState<any>([])
-
-  const { toast } = useToast()
 
   useEffect(() => {
     if (status === 'loading') return
@@ -250,46 +248,28 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
   const handleSubmit = async () => {
     try {
       if (!selectedAttendance.jamKe) {
-        toast({
-          title: 'Error',
-          description: 'Jam ke belum dipilih',
-        })
+        toast.error('Jam ke belum dipilih')
         return
       }
 
       const response = await updateDataAbsen(selectedAttendance)
 
       if (!response.success) {
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: response.message,
-        })
+        toast.error(response.message)
       } else {
         setDialog(false)
-        toast({
-          title: 'Sukses',
-          description: response.message,
-        })
+        toast.success('Data Absensi berhasil di update')
         setJamKe(undefined)
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Gagal menyimpan data',
-      })
+      toast.error('Gagal menyimpan data')
     }
   }
 
   const handleConfirm = async () => {
     if (!jamKe) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Jam ke belum dipilih',
-      })
+      toast.error('Jam ke belum dipilih')
       selectRef.current?.focus()
 
       return

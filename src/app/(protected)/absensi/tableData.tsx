@@ -31,10 +31,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { useToast } from '@/hooks/use-toast'
 import { useCurrentSession } from '@/hooks/useCurrentUser'
 import { Label } from '@/components/ui/label'
 import SearchInput from '@/components/search-input'
+import { toast } from 'sonner'
 
 export type AsramaProps = {
   name: string
@@ -131,8 +131,6 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
   const { session } = useCurrentSession()
   const [kelasId, setKelasId] = useState<number | null>(null)
 
-  const { toast } = useToast()
-
   const handleCheckboxChange = (siswaId: number, status: string) => {
     setSelectedAttendance((prev) => {
       const updatedData = prev.data.filter((item) => item.siswaId !== siswaId)
@@ -203,10 +201,7 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
   const handleSubmit = async () => {
     try {
       if (!selectedAttendance.jamKe) {
-        toast({
-          title: 'Error',
-          description: 'Jam ke belum dipilih',
-        })
+        toast.error('Jam ke belum dipilih')
         return
       }
 
@@ -216,17 +211,10 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
       )
 
       if (!response.success) {
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: response.message,
-        })
+        toast.error(response.message)
       } else {
         setDialog(false)
-        toast({
-          title: 'Sukses',
-          description: 'Data berhasil disimpan',
-        })
+        toast.success('Data berhasil disimpan')
         const test = await cekAbsensiMultiJam(
           kelasId!,
           new Date(),
@@ -238,21 +226,13 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Gagal menyimpan data',
-      })
+      toast.error('Gagal menyimpan data')
     }
   }
 
   const handleConfirm = async () => {
     if (!jamKe) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Jam ke belum dipilih',
-      })
+      toast.error('Jam ke belum dipilih')
       selectRef.current?.focus()
 
       return

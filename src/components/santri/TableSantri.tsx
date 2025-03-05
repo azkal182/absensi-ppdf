@@ -10,8 +10,8 @@ import {
   SantriWithRelations,
   updateSantri,
 } from '@/actions/santri'
-import { toast } from '@/hooks/use-toast'
 import { Card } from '../ui/card'
+import { toast } from 'sonner'
 
 export type Asrama = {
   id: number
@@ -69,10 +69,7 @@ const TableSantri = () => {
     await updateSantri(selectedSiswa.id, data)
     closeModal()
     await loadSantri()
-    toast({
-      title: 'berhasil',
-      description: 'Santri Berhasil diupdate',
-    })
+    toast.success('Santri Berhasil diupdate')
   }
 
   return (

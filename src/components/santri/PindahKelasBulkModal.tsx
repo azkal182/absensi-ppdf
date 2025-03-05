@@ -222,7 +222,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { pindahKelasBulk } from '@/actions/santri'
 import { getClassByAsramaId } from '@/actions/absenAction'
-import { toast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 
 // Schema validasi menggunakan Zod
 const FormUpdateBulkSantri = z.object({
@@ -324,17 +324,9 @@ export default function PindahKelasBulkModal({
       //   @ts-ignore
       pindahKelasBulk({ data }).then((res) => {
         if (res.error) {
-          toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: res.error,
-          })
+          toast.error(res.error)
         } else {
-          toast({
-            variant: 'default',
-            title: 'Berhasil',
-            description: `${data.id.length} Santri berhasil dipindah`,
-          })
+          toast.success(`${data.id.length} Santri berhasil dipindah`)
           onClose()
           onSubmit()
         }

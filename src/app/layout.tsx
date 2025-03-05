@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 // import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
-import { Toaster } from '@/components/ui/toaster'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import NextTopLoader from 'nextjs-toploader'
 import Providers from './provider'
 import Head from 'next/head'
 import { auth } from '@/auth'
+import { Toaster } from 'sonner'
 // const geistSans = Geist({
 //   variable: '--font-geist-sans',
 //   subsets: ['latin'],
@@ -51,8 +51,8 @@ export default async function RootLayout({
         <NextTopLoader showSpinner={false} />
         <NuqsAdapter>
           <Providers session={session}>
-            <Toaster />
             {children}
+            <Toaster richColors />
           </Providers>
         </NuqsAdapter>
       </body>

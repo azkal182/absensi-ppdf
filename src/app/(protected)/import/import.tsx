@@ -1,12 +1,11 @@
 'use client'
 import { importData } from '@/actions/import'
-import { useToast } from '@/hooks/use-toast'
 import { ChangeEvent } from 'react'
+import { toast } from 'sonner'
 import * as XLSX from 'xlsx'
 
 export default function ImportPage() {
   // const [data, setData] = useState<ExcelData[]>([])
-  const { toast } = useToast()
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     // console.log("triggered");
@@ -24,10 +23,7 @@ export default function ImportPage() {
       const workbook = XLSX.read(binaryStr, { type: 'binary' })
       importData(workbook).then((res) => {
         console.log(res)
-        toast({
-          title: 'Sukses',
-          description: res.message,
-        })
+        toast.success('res.message')
       })
     }
 

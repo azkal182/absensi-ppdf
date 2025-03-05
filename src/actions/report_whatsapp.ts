@@ -200,20 +200,25 @@ export const generatePdf = async () => {
     pdfBlob,
     `Laporan_Absensi_${format(new Date(), 'dd-MM-yyyy', { locale: id })}.pdf`
   ) // Gunakan Blob
-  const response = await fetch(
-    `https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendDocument`,
-    {
-      method: 'POST',
-      body: form,
+  try {
+    const response = await fetch(
+      `https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendDocument`,
+      {
+        method: 'POST',
+        body: form,
+      }
+    )
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(`Telegram API error: ${JSON.stringify(result)}`)
     }
-  )
-
-  const result = await response.json()
-
-  if (!response.ok) {
-    throw new Error(`Telegram API error: ${JSON.stringify(result)}`)
+    return { message: 'berhasil terkirim Laporan' }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error: any) {
+    return { error: 'gagal mengirim Laporan' }
   }
-  return { message: 'berhasil terkirim ke telegram' }
 }
 
 // 🔹 Mendapatkan tanggal hari ini di zona Jakarta

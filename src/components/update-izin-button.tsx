@@ -13,8 +13,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { useToast } from '@/hooks/use-toast'
 import { updateIzinDepartemen } from '@/actions/izin'
+import { toast } from 'sonner'
 
 interface DeleteButtonProps {
   item: any
@@ -24,17 +24,16 @@ interface DeleteButtonProps {
 export default function UpdateIzinButton({ item, title }: DeleteButtonProps) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const { toast } = useToast()
   console.log(item)
 
   const handleDelete = async () => {
     startTransition(async () => {
       const result = await updateIzinDepartemen(item.id)
       if (result.success) {
-        toast({ title: 'Data berhasil diupdate', variant: 'default' })
+        toast.success('Data berhasil diupdate')
         setOpen(false)
       } else {
-        toast({ title: result.message, variant: 'destructive' })
+        toast.error(result.message)
       }
     })
   }

@@ -226,7 +226,6 @@ import { useEffect, useState } from 'react'
 import { Input } from '../ui/input'
 import CreateSantriModal from './CreateSantriModal'
 import { createSantri } from '@/actions/santri'
-import { toast } from '@/hooks/use-toast'
 import {
   Select,
   SelectContent,
@@ -242,6 +241,7 @@ import {
   ChevronsRight,
 } from 'lucide-react'
 import PindahKelasBulkModal from './PindahKelasBulkModal'
+import { toast } from 'sonner'
 
 interface DataTableProps<TData extends { id: number }, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -313,10 +313,7 @@ export function DataTable<TData extends { id: number }, TValue>({
   const handleCreate = async (data: any) => {
     await createSantri(data)
     setOpenModalCreate(false)
-    toast({
-      title: 'berhasil',
-      description: 'Santri Berhasil Dibuat',
-    })
+    toast.success('Santri Berhasil Dibuat')
     onCreate()
   }
 

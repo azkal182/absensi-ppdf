@@ -56,7 +56,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { toast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 
 const schema = z
   .object({
@@ -156,17 +156,10 @@ const TableReport = ({ data }: { data: any }) => {
   const sentReport = async (id: number) => {
     try {
       await sendAbsensiReportById(id)
-      toast({
-        title: 'Sukses',
-        description: 'Data berhasil dikirim',
-      })
+      toast.success('Data berhasil dikirim')
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Gagal',
-        description: 'Data Gagal dikirim',
-      })
+      toast.error('Data Gagal dikirim')
     }
   }
 
@@ -187,7 +180,13 @@ const TableReport = ({ data }: { data: any }) => {
   //   }
 
   const sentAllReport = async () => {
-    await generatePdf()
+    toast.promise(generatePdf(), {
+      loading: 'Loading...',
+      success: (data) => {
+        return data.message
+      },
+      error: 'Gagal Mengirim Laporan',
+    })
   }
 
   return (
@@ -198,7 +197,7 @@ const TableReport = ({ data }: { data: any }) => {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex justify-end space-x-4">
-            <Button variant={'secondary'} onClick={() => sentAllReport()}>
+            <Button variant={'outline'} onClick={() => sentAllReport()}>
               Kirim Laporan
             </Button>
             <Button onClick={() => handleOpenModal()}>Add</Button>
