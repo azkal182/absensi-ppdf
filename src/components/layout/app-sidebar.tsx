@@ -213,7 +213,8 @@ export default function AppSidebar() {
                     const userRole = sessionUser.user?.role || 'ASRAMA'
 
                     if (!item.roles?.includes(userRole)) return null
-
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
                     const hasSubItems = item.items?.length > 0
 
                     return (
@@ -237,7 +238,7 @@ export default function AppSidebar() {
                               </CollapsibleTrigger>
                               <CollapsibleContent>
                                 <SidebarMenuSub>
-                                  {item.items.map((subItem) => (
+                                  {item.items?.map((subItem) => (
                                     <SidebarMenuSubItem key={subItem.title}>
                                       <SidebarMenuSubButton
                                         asChild
