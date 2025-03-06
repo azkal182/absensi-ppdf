@@ -19,7 +19,8 @@ export const navItems: NavItem[] = [
     icon: 'dashboard',
     isActive: false,
     shortcut: ['d', 'd'],
-    items: [], // Empty array as there are no child items for Dashboard
+    items: [],
+    roles: ['ADMIN', 'USER', 'ASRAMA'],
   },
   {
     title: 'Absensi',
@@ -27,6 +28,7 @@ export const navItems: NavItem[] = [
     icon: 'listCheck',
     isActive: false,
     items: [],
+    roles: ['ADMIN', 'USER', 'ASRAMA'],
   },
   {
     title: 'Daftar Absensi',
@@ -34,6 +36,7 @@ export const navItems: NavItem[] = [
     icon: 'listChecks',
     isActive: false,
     items: [],
+    roles: ['ADMIN', 'USER', 'ASRAMA'],
   },
 ]
 
@@ -43,7 +46,8 @@ export const navIzins: NavItem[] = [
     url: '/izin-asrama',
     icon: 'housePlus',
     isActive: false,
-    items: [], // Empty array as there are no child items for Dashboard
+    items: [],
+    roles: ['ADMIN', 'USER'],
   },
   {
     title: 'Izin Keamanan',
@@ -51,6 +55,7 @@ export const navIzins: NavItem[] = [
     icon: 'listChecks',
     isActive: false,
     items: [],
+    roles: ['ADMIN', 'USER'],
   },
   {
     title: 'Izin Kesehatan',
@@ -58,6 +63,7 @@ export const navIzins: NavItem[] = [
     icon: 'stethoscope',
     isActive: false,
     items: [],
+    roles: ['ADMIN', 'USER'],
   },
   {
     title: 'Izin Komdis',
@@ -65,6 +71,7 @@ export const navIzins: NavItem[] = [
     icon: 'shield',
     isActive: false,
     items: [],
+    roles: ['ADMIN', 'USER'],
   },
 ]
 
@@ -74,7 +81,8 @@ export const navMasters: NavItem[] = [
     url: '/validasi-absen',
     icon: 'housePlus',
     isActive: false,
-    items: [], // Empty array as there are no child items for Dashboard
+    items: [],
+    roles: ['ADMIN', 'USER'],
   },
   {
     title: 'Import',
@@ -82,6 +90,7 @@ export const navMasters: NavItem[] = [
     icon: 'listChecks',
     isActive: false,
     items: [],
+    roles: ['ADMIN'],
   },
   {
     title: 'Data',
@@ -89,6 +98,7 @@ export const navMasters: NavItem[] = [
     icon: 'stethoscope',
     isActive: false,
     items: [],
+    roles: ['ADMIN', 'USER'],
   },
   {
     title: 'Users',
@@ -96,6 +106,7 @@ export const navMasters: NavItem[] = [
     icon: 'users',
     isActive: false,
     items: [],
+    roles: ['ADMIN', 'USER'],
   },
   {
     title: 'Laporan Whatsapp',
@@ -103,6 +114,7 @@ export const navMasters: NavItem[] = [
     icon: 'receiptPoundSterlingIcon',
     isActive: false,
     items: [],
+    roles: ['ADMIN'],
   },
 ]
 

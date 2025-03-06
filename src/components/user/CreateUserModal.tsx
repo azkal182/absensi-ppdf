@@ -148,6 +148,9 @@ export default function CreateUserModal({
                         (a) => a.id === parseInt(val)
                       )
                       form.setValue('asramaId', null)
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      //   @ts-ignore
+                      form.setValue('role', role?.name)
                       setSelectRole(role?.name as string)
                       field.onChange(Number(val))
                     }}
