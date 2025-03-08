@@ -15,6 +15,7 @@ const API_KEY =
   'a24ebffc8739bfb85cebf8446605a0cd670012cbbc878af2a4e1af1ded72e578'
 const TOKEN_TELEGRAM = '7797810278:AAFE0O8oz-0rU0XYwkBDVwOK61j4ZxX40t4'
 const JAKARTA_TIMEZONE = 'Asia/Jakarta'
+const CHAT_ID = '404000198'
 
 import {
   TDocumentDefinitions,
