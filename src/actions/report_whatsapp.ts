@@ -200,25 +200,57 @@ export const generatePdf = async () => {
     pdfBlob,
     `Laporan_Absensi_${format(new Date(), 'dd-MM-yyyy', { locale: id })}.pdf`
   ) // Gunakan Blob
-  try {
-    const response = await fetch(
-      `https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendDocument`,
-      {
-        method: 'POST',
-        body: form,
+  let attempt = 0;
+  const maxRetries = 5;
+
+  while (attempt < maxRetries) {
+    try {
+      const response = await fetch(
+        `https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendDocument`,
+        {
+          method: 'POST',
+          body: form,
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(`Telegram API error: ${JSON.stringify(result)}`);
       }
-    )
 
-    const result = await response.json()
+      return { message: 'berhasil terkirim Laporan' };
+    } catch (error) {
+      attempt++;
+      const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
 
-    if (!response.ok) {
-      throw new Error(`Telegram API error: ${JSON.stringify(result)}`)
+      // Kirim pesan kegagalan ke Telegram
+      await fetch(`https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: CHAT_ID, // Ganti dengan ID chat tujuan
+          text: `Percobaan ${attempt} gagal mengirim laporan.\nAlasan: ${error}\nMenunggu ${delay / 1000} detik sebelum mencoba lagi...`,
+        }),
+      });
+
+      // Tunggu sebelum mencoba lagi
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
-    return { message: 'berhasil terkirim Laporan' }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error: any) {
-    return { error: 'gagal mengirim Laporan' }
   }
+
+  // Jika setelah 5 kali masih gagal, kirim pesan final ke Telegram
+  await fetch(`https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: CHAT_ID, // Ganti dengan ID chat tujuan
+      text: `Gagal mengirim laporan setelah ${maxRetries} kali percobaan.`,
+    }),
+  });
+
+  return { error: 'gagal mengirim Laporan setelah beberapa kali percobaan' };
+
 }
 
 // 🔹 Mendapatkan tanggal hari ini di zona Jakarta
