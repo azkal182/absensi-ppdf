@@ -4,6 +4,7 @@ import { SelectedAttendance } from '@/app/(protected)/absensi/tableData'
 import prisma from '@/lib/prisma'
 import { StatusAbsen } from '@prisma/client'
 import { fromZonedTime, toZonedTime } from 'date-fns-tz'
+import { DateTime } from 'luxon'
 
 // const TIMEZONE = process.env.NEXT_PUBLIC_TIMEZONE as string;
 
@@ -40,10 +41,12 @@ export async function getClassByAsramaId(asramaId: number) {
 
 // GET: Ambil data Asrama, Kelas, dan Siswa
 export async function getDataByKelasId(kelasId: number) {
-  const today = new Date()
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0)) // 00:00:00
-  const endOfDay = new Date(today.setHours(23, 59, 59, 999)) // 23:59:59
-  console.log(startOfDay, endOfDay)
+  const now = DateTime.now().setZone('Asia/Jakarta')
+
+  const startOfDayUTC = now.startOf('day').toUTC().toJSDate()
+  const endOfDayUTC = now.endOf('day').toUTC().toJSDate()
+
+  console.log(startOfDayUTC, endOfDayUTC)
 
   try {
     const siswa = await prisma.siswa.findMany({
@@ -57,16 +60,17 @@ export async function getDataByKelasId(kelasId: number) {
               // izin hanya sehari
               {
                 startDate: {
-                  gte: startOfDay,
-                  lt: endOfDay,
+                  gte: startOfDayUTC,
+                  lt: endOfDayUTC,
                 },
                 onlyOneDay: true,
               },
               // izin berlaku dengan tanggal selesai tidak ditentukan
-              // {
-              //     startDate: new Date(),
-              //     endDate: null,
-              // },
+              {
+                //   startDate: new Date(),
+                onlyOneDay: false,
+                endDate: null,
+              },
               // izin tanggal dengan range
             ],
           },
