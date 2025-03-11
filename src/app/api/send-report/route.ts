@@ -137,6 +137,8 @@ export async function GET() {
     // const response = await sendAbsensiReport()
     const response = await generatePdf()
     // return NextResponse.json(response)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return new NextResponse(response, {
       headers: {
         'Content-Type': 'application/pdf',
