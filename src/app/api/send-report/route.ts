@@ -136,7 +136,13 @@ export async function GET() {
   try {
     // const response = await sendAbsensiReport()
     const response = await generatePdf()
-    return NextResponse.json(response)
+    // return NextResponse.json(response)
+    return new NextResponse(response, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'attachment; filename="absensi.pdf"',
+      },
+    })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

@@ -43,6 +43,8 @@ export async function getDataByKelasId(kelasId: number) {
   const today = new Date()
   const startOfDay = new Date(today.setHours(0, 0, 0, 0)) // 00:00:00
   const endOfDay = new Date(today.setHours(23, 59, 59, 999)) // 23:59:59
+  console.log(startOfDay, endOfDay)
+
   try {
     const siswa = await prisma.siswa.findMany({
       where: {
@@ -61,10 +63,10 @@ export async function getDataByKelasId(kelasId: number) {
                 onlyOneDay: true,
               },
               // izin berlaku dengan tanggal selesai tidak ditentukan
-              {
-                // startDate: new Date(),
-                endDate: null,
-              },
+              // {
+              //     startDate: new Date(),
+              //     endDate: null,
+              // },
               // izin tanggal dengan range
             ],
           },
@@ -99,8 +101,8 @@ export async function getDataByKelasId(kelasId: number) {
           : null, // Jika izin kosong, set null
     }))
 
-    console.log(JSON.stringify(formattedSiswaList, null, 2))
-    console.log(new Date())
+    // console.log(JSON.stringify(formattedSiswaList, null, 2))
+    // console.log(new Date())
 
     return formattedSiswaList
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -421,6 +423,86 @@ export async function getDaftarAbsen(
     return { error: 'Terjadi kesalahan saat mengambil data absensi.' }
   }
 }
+export async function getDaftarAbsenByAsrama(
+  asramaId: number,
+  year: number,
+  month: number
+): Promise<Absensi[] | { error: string }> {
+  try {
+    // Awal bulan di zona WIB (1 Maret 2025 00:00 WIB)
+    const startOfMonthWIB = new Date(year, month - 1, 1, 0, 0, 0)
+    const startDateUTC = new Date(
+      startOfMonthWIB.getTime() - 7 * 60 * 60 * 1000
+    ) // Kurangi 7 jam
+
+    // Akhir bulan di zona WIB (31 Maret 2025 23:59:59 WIB)
+    const endOfMonthWIB = new Date(year, month, 0, 23, 59, 59)
+    const endDateUTC = new Date(endOfMonthWIB.getTime() - 7 * 60 * 60 * 1000) // Kurangi 7 jam
+
+    const absensiList = await prisma.absensi.findMany({
+      where: {
+        date: {
+          gte: startDateUTC.toISOString(),
+          lte: endDateUTC.toISOString(),
+        },
+        siswa: {
+          asramaId,
+        },
+      },
+      include: {
+        siswa: true,
+        JamAbsensi: {
+          select: {
+            jamKe: true,
+            status: true,
+          },
+          orderBy: { jamKe: 'asc' },
+        },
+      },
+      orderBy: [{ siswaId: 'asc' }, { date: 'asc' }],
+    })
+
+    if (!absensiList || absensiList.length === 0) {
+      return [] // Return empty array if no data is found
+    }
+
+    // Structure the data for easier processing
+    const siswaMap = new Map()
+
+    absensiList.forEach((absensi) => {
+      const siswaId = absensi.siswa?.id ?? 0 // Ensure siswa exists
+      if (!siswaMap.has(siswaId)) {
+        siswaMap.set(siswaId, {
+          id: siswaId,
+          name: absensi.siswa?.name ?? 'Unknown',
+          absensi: {},
+        })
+      }
+
+      // Convert the UTC date to Asia/Jakarta timezone
+      const jakartaDate = toZonedTime(absensi.date, 'Asia/Jakarta')
+      const formattedDate = new Date(jakartaDate).getDate() // Extract the day
+
+      // If no attendance for this date yet, initialize an empty object
+      if (!siswaMap.get(siswaId).absensi[formattedDate]) {
+        siswaMap.get(siswaId).absensi[formattedDate] = []
+      }
+
+      // Add all available jamKe for this date
+      absensi.JamAbsensi.forEach((jam) => {
+        siswaMap.get(siswaId).absensi[formattedDate].push({
+          jamKe: jam.jamKe,
+          status: jam.status,
+        })
+      })
+    })
+
+    return Array.from(siswaMap.values())
+  } catch (error) {
+    console.error('Error fetching absensi:', error)
+    return { error: 'Terjadi kesalahan saat mengambil data absensi.' }
+  }
+}
 
 export async function getDaftarAbsenTodayByKelasId(
   kelasId: number
@@ -607,8 +689,6 @@ export async function getChartThisMonth() {
     })
 
     const formattedResult = absensiByAsrama.map((asrama) => {
-      console.log(asrama)
-
       const statusCount = asrama.Absensi.reduce(
         (acc, absen) => {
           acc[absen.status] = (acc[absen.status] || 0) + 1
@@ -878,6 +958,9 @@ export async function getDaftarAlfa() {
     // Ambil waktu saat ini dan ubah ke zona Asia/Jakarta
     const todayJakarta = toZonedTime(new Date(), 'Asia/Jakarta')
 
+    // Kurangi 2 hari dari hari ini
+    // todayJakarta.setDate(todayJakarta.getDate() - 1)
+
     // Set jam ke 00:00 di zona Jakarta
     todayJakarta.setHours(0, 0, 0, 0)
 
@@ -1010,11 +1093,90 @@ export async function getDaftarAlfa() {
       })),
     }))
 
-    console.log(JSON.stringify(result))
+    // console.log(JSON.stringify(result))
 
     return result
   } catch (error) {
     console.error('Error fetching absensi ALFA:', error)
     return { error: 'Terjadi kesalahan saat mengambil data absensi ALFA.' }
+  }
+}
+
+export async function getLaporanKeamanan(): Promise<
+  Absensi[] | { error: string }
+> {
+  try {
+    // Awal bulan di zona WIB (1 Maret 2025 00:00 WIB)
+    const startOfMonthWIB = new Date(2025, 2, 1, 0, 0, 0)
+    const startDateUTC = new Date(
+      startOfMonthWIB.getTime() - 7 * 60 * 60 * 1000
+    ) // Kurangi 7 jam
+
+    // Akhir bulan di zona WIB (31 Maret 2025 23:59:59 WIB)
+    const endOfMonthWIB = new Date(2025, 3, 0, 23, 59, 59)
+    const endDateUTC = new Date(endOfMonthWIB.getTime() - 7 * 60 * 60 * 1000) // Kurangi 7 jam
+
+    const absensiList = await prisma.absensi.findMany({
+      where: {
+        date: {
+          gte: startDateUTC.toISOString(),
+          lte: endDateUTC.toISOString(),
+        },
+        siswa: {
+          kelasId: 363,
+        },
+      },
+      include: {
+        siswa: true,
+        JamAbsensi: {
+          select: {
+            jamKe: true,
+            status: true,
+          },
+          orderBy: { jamKe: 'asc' },
+        },
+      },
+      orderBy: [{ siswaId: 'asc' }, { date: 'asc' }],
+    })
+
+    if (!absensiList || absensiList.length === 0) {
+      return [] // Return empty array if no data is found
+    }
+
+    // Structure the data for easier processing
+    const siswaMap = new Map()
+
+    absensiList.forEach((absensi) => {
+      const siswaId = absensi.siswa?.id ?? 0 // Ensure siswa exists
+      if (!siswaMap.has(siswaId)) {
+        siswaMap.set(siswaId, {
+          id: siswaId,
+          name: absensi.siswa?.name ?? 'Unknown',
+          absensi: {},
+        })
+      }
+
+      // Convert the UTC date to Asia/Jakarta timezone
+      const jakartaDate = toZonedTime(absensi.date, 'Asia/Jakarta')
+      const formattedDate = new Date(jakartaDate).getDate() // Extract the day
+
+      // If no attendance for this date yet, initialize an empty object
+      if (!siswaMap.get(siswaId).absensi[formattedDate]) {
+        siswaMap.get(siswaId).absensi[formattedDate] = []
+      }
+
+      // Add all available jamKe for this date
+      absensi.JamAbsensi.forEach((jam) => {
+        siswaMap.get(siswaId).absensi[formattedDate].push({
+          jamKe: jam.jamKe,
+          status: jam.status,
+        })
+      })
+    })
+
+    return Array.from(siswaMap.values())
+  } catch (error) {
+    console.error('Error fetching absensi:', error)
+    return { error: 'Terjadi kesalahan saat mengambil data absensi.' }
   }
 }
