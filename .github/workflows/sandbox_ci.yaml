@@ -1,4 +1,4 @@
-name: CI/CD Absensi
+name: CI/CD Absensi Apps
 
 on:
   push:
@@ -6,16 +6,28 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [absensi, absensi-putri]
+        include:
+          - app: absensi
+            port: 4040
+            folder: absensi
+            db: absensi
+            url: https://absensi.amtsilatipusat.com
+          - app: absensi-putri
+            port: 4041
+            folder: absensi-putri
+            db: absensi_putri
+            url: https://absensi-putri.amtsilatipusat.com
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Print current branch
-        run: echo ${{ github.ref }}
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
@@ -26,20 +38,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Print DATABASE_URL
-        run: echo ${{ secrets.DATABASE_URL }}
-
       - name: Run Prisma Migrations
         env:
-          DATABASE_URL: 'postgresql://azkal:azkal@165.22.106.176:5432/absensi?schema=public'
-        run: npx prisma migrate deploy || sleep 10 && npx prisma migrate deploy
+          DATABASE_URL: postgresql://azkal:azkal@165.22.106.176:5432/${{ matrix.db }}?schema=public
+        run: npx prisma migrate deploy || (sleep 10 && npx prisma migrate deploy)
 
-      - name: Build Next.js application
+      - name: Build Next.js app
         env:
-          DATABASE_URL: 'postgresql://azkal:azkal@165.22.106.176:5432/absensi?schema=public'
+          DATABASE_URL: postgresql://azkal:azkal@165.22.106.176:5432/${{ matrix.db }}?schema=public
+          NEXTAUTH_URL: ${{ matrix.url }}
+          AUTH_TRUST_HOST: ${{ matrix.url }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-          NEXTAUTH_URL: 'https://absensi.amtsilatipusat.com'
-          AUTH_TRUST_HOST: 'https://absensi.amtsilatipusat.com'
         run: pnpm build
 
       - name: Add SSH key
@@ -50,65 +59,47 @@ jobs:
       - name: Add server to known_hosts
         run: ssh-keyscan 165.22.106.176 >> ~/.ssh/known_hosts
 
-      - name: Deploy to VPS
+      - name: Deploy to VPS (pull repo if needed)
         run: |
-          ssh -tt azkal@165.22.106.176 << 'EOF'
-              # Verifikasi apakah direktori /home/azkal/project/absensi ada
-              if [ ! -d "/home/azkal/project/absensi" ]; then
-              echo "Directory /home/azkal/project/absensi does not exist. Cloning project..."
-              git clone https://github.com/azkal182/absensi-ppdf.git /home/azkal/project/absensi
-              cd /home/azkal/project/absensi
+          ssh -tt azkal@165.22.106.176 << EOF
+            if [ ! -d "/home/azkal/project/${{ matrix.folder }}" ]; then
+              echo "Directory not found, cloning..."
+              git clone https://github.com/azkal182/absensi-ppdf.git /home/azkal/project/${{ matrix.folder }}
+              cd /home/azkal/project/${{ matrix.folder }}
               git checkout main
-              else
-              echo "Directory /home/azkal/project/absensi exists. Pulling latest changes..."
-              cd /home/azkal/project/absensi
-              git checkout main
+            else
+              echo "Directory exists, pulling latest code..."
+              cd /home/azkal/project/${{ matrix.folder }}
               git pull origin main
-              fi
-              exit
+            fi
+            exit
           EOF
 
-      - name: Copy build files to VPS
+      - name: Copy build files
         run: |
-          rsync -avz --delete .next/ azkal@165.22.106.176:/home/azkal/project/absensi/.next/
-          rsync -avz --delete public/ azkal@165.22.106.176:/home/azkal/project/absensi/public/
-          rsync -avz --delete package.json pnpm-lock.yaml azkal@165.22.106.176:/home/azkal/project/absensi/
+          rsync -avz --delete .next/ azkal@165.22.106.176:/home/azkal/project/${{ matrix.folder }}/.next/
+          rsync -avz --delete public/ azkal@165.22.106.176:/home/azkal/project/${{ matrix.folder }}/public/
+          rsync -avz --delete package.json pnpm-lock.yaml azkal@165.22.106.176:/home/azkal/project/${{ matrix.folder }}/
 
-      - name: Install Dependencies and Restart App
+      - name: Install deps and start app on VPS
         run: |
-          ssh -tt azkal@165.22.106.176 << 'EOF'
-              # Masuk ke direktori project
-              cd /home/azkal/project/absensi
+          ssh -tt azkal@165.22.106.176 << EOF
+            cd /home/azkal/project/${{ matrix.folder }}
 
-              # Hentikan aplikasi yang berjalan (jika menggunakan PM2)
-              if pm2 describe absensi > /dev/null; then
-              pm2 stop absensi
-              pm2 delete absensi
-              else
-              echo "PM2 application 'absensi' not found, skipping stop."
-              fi
+            if pm2 describe ${{ matrix.app }} > /dev/null; then
+              pm2 stop ${{ matrix.app }}
+              pm2 delete ${{ matrix.app }}
+            fi
 
-              # Install dependencies tanpa build
-              pnpm install --production
+            pnpm install --production
 
-              # Update variabel di file .env
-              sed -i '/^DATABASE_URL=/d' .env
-              echo "DATABASE_URL=\"postgresql://azkal:azkal@localhost:5432/absensi?schema=public\"" >> .env
+            # Create/update .env file
+            echo "DATABASE_URL=\"postgresql://azkal:azkal@localhost:5432/${{ matrix.db }}?schema=public\"" > .env
+            echo "NEXTAUTH_URL=\"${{ matrix.url }}\"" >> .env
+            echo "AUTH_TRUST_HOST=\"${{ matrix.url }}\"" >> .env
+            echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}" >> .env
 
+            pm2 start npm --name "${{ matrix.app }}" -- start -- -p ${{ matrix.port }}
 
-              sed -i '/^NEXTAUTH_URL=/d' .env
-              echo "NEXTAUTH_URL=\"https://absensi.amtsilatipusat.com\"" >> .env
-
-              sed -i '/^AUTH_TRUST_HOST=/d' .env
-              echo "AUTH_TRUST_HOST=\"https://absensi.amtsilatipusat.com\"" >> .env
-
-              sed -i '/^AUTH_SECRET=/d' .env
-              echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}" >> .env
-
-
-              # Restart aplikasi dengan PM2 tanpa build
-              pm2 start npm --name "absensi" -- start -- -p 4040
-
-              # Keluar dari SSH
-              exit
+            exit
           EOF
