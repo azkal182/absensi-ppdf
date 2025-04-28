@@ -127,23 +127,32 @@
 // }
 
 import { NextResponse } from 'next/server'
-import { generatePdf } from '@/actions/report_whatsapp'
+import { generatePdf, getReportWhatsapp } from '@/actions/report_whatsapp'
 
 // 🔹 Mengirim laporan absensi ke WhatsApp & Telegram
 
 // 🔹 API Handler (GET)
 export async function GET() {
+  const listJid = await getReportWhatsapp()
   try {
+    const ids = listJid
+      .filter((data) => data.telegram)
+      .map((data) => data.telegramId)
     // const response = await sendAbsensiReport()
-    const response = await generatePdf()
+    await generatePdf(ids)
     // return NextResponse.json(response)
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return new NextResponse(response, {
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename="absensi.pdf"',
-      },
+    // return new NextResponse(response, {
+    //     headers: {
+    //         'Content-Type': 'application/pdf',
+    //         'Content-Disposition': 'attachment; filename="absensi.pdf"',
+    //     },
+    // })
+
+    return NextResponse.json({
+      message: '✅ Pesan berhasil dikirim!',
+      data: listJid,
     })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })

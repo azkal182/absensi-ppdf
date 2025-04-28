@@ -180,7 +180,12 @@ const TableReport = ({ data }: { data: any }) => {
   //   }
 
   const sentAllReport = async () => {
-    toast.promise(generatePdf(), {
+    const ids = data
+      .filter((item: any) => item.telegram)
+      .map((item: any) => item.telegramId)
+    // alert(ids)
+    // alert
+    toast.promise(generatePdf(ids), {
       loading: 'Loading...',
       success: (data) => {
         return data.message

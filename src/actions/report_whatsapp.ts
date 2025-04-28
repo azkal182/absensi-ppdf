@@ -51,7 +51,7 @@ interface Asrama {
   kelas: Kelas[]
 }
 
-export const generatePdf = async () => {
+export const generatePdf = async (telegramId: any) => {
   const data: any[] | { error: string } = await getDaftarAlfa()
 
   const today = getTodayInJakarta()
@@ -201,29 +201,51 @@ export const generatePdf = async () => {
     pdfBlob,
     `Laporan_Absensi_${format(new Date(), 'dd-MM-yyyy', { locale: id })}.pdf`
   ) // Gunakan Blob
-  let attempt = 0;
-  const maxRetries = 5;
+  let attempt = 0
+  const maxRetries = 5
 
   while (attempt < maxRetries) {
     try {
-      const response = await fetch(
-        `https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendDocument`,
-        {
-          method: 'POST',
-          body: form,
+      // const response = await fetch(
+      //     `https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendDocument`,
+      //     {
+      //         method: 'POST',
+      //         body: form,
+      //     }
+      // )
+      for (const chatId of telegramId) {
+        const formData = new FormData()
+        formData.append('chat_id', chatId)
+        formData.append('caption', caption)
+        formData.append(
+          'document',
+          pdfBlob,
+          `Laporan_Absensi_${format(new Date(), 'dd-MM-yyyy', { locale: id })}.pdf`
+        ) // Gunakan Blob
+
+        const response = await fetch(
+          `https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendDocument`,
+          {
+            method: 'POST',
+            body: formData,
+          }
+        )
+
+        const result = await response.json()
+
+        if (!response.ok) {
+          throw new Error(
+            `Telegram API error untuk chatId ${chatId}: ${JSON.stringify(result)}`
+          )
         }
-      );
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(`Telegram API error: ${JSON.stringify(result)}`);
+        console.log(`✅ Berhasil kirim ke chatId: ${chatId}`)
       }
 
-      return { message: 'berhasil terkirim Laporan' };
+      return { message: 'berhasil terkirim Laporan' }
     } catch (error) {
-      attempt++;
-      const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+      attempt++
+      const delay = Math.pow(2, attempt) * 1000 // Exponential backoff
 
       // Kirim pesan kegagalan ke Telegram
       await fetch(`https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendMessage`, {
@@ -233,10 +255,10 @@ export const generatePdf = async () => {
           chat_id: CHAT_ID, // Ganti dengan ID chat tujuan
           text: `Percobaan ${attempt} gagal mengirim laporan.\nAlasan: ${error}\nMenunggu ${delay / 1000} detik sebelum mencoba lagi...`,
         }),
-      });
+      })
 
       // Tunggu sebelum mencoba lagi
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay))
     }
   }
 
@@ -248,10 +270,72 @@ export const generatePdf = async () => {
       chat_id: CHAT_ID, // Ganti dengan ID chat tujuan
       text: `Gagal mengirim laporan setelah ${maxRetries} kali percobaan.`,
     }),
-  });
+  })
+  // const maxRetries = 5;
 
-  return { error: 'gagal mengirim Laporan setelah beberapa kali percobaan' };
+  // let attempt = 0;
 
+  // while (attempt < maxRetries) {
+  //     try {
+  //         for (const chatId of telegramId) {
+  //             const formData = new FormData();
+  //             formData.append('chat_id', chatId);
+  //             // tambahkan file atau data lain ke formData sesuai kebutuhanmu
+
+  //             const response = await fetch(
+  //                 `https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendDocument`,
+  //                 {
+  //                     method: 'POST',
+  //                     body: formData,
+  //                 }
+  //             );
+
+  //             const result = await response.json();
+
+  //             if (!response.ok) {
+  //                 throw new Error(`Telegram API error untuk chatId ${chatId}: ${JSON.stringify(result)}`);
+  //             }
+
+  //             console.log(`✅ Berhasil kirim ke chatId: ${chatId}`);
+  //         }
+
+  //         // Kalau semua ID sukses, keluar dari while
+  //         console.log('✅ Semua laporan berhasil dikirim.');
+  //         return { message: 'Semua laporan berhasil terkirim.' };
+
+  //     } catch (error) {
+  //         attempt++;
+  //         const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+
+  //         // console.error(`❌ Error pada attempt ${attempt}:`, error.message);
+
+  //         // Kirim pesan error umum (bisa ke admin atau id khusus)
+  //         await fetch(`https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendMessage`, {
+  //             method: 'POST',
+  //             headers: { 'Content-Type': 'application/json' },
+  //             body: JSON.stringify({
+  //                 chat_id: CHAT_ID, // id admin yang dikasih notif error
+  //                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //                 // @ts-expect-error
+  //                 text: `Percobaan ${attempt} gagal mengirim laporan.\nAlasan: ${error.message}\nTunggu ${delay / 1000} detik sebelum retry...`,
+  //             }),
+  //         });
+
+  //         await new Promise((resolve) => setTimeout(resolve, delay));
+  //     }
+  // }
+
+  // // Kalau habis retry masih gagal
+  // await fetch(`https://api.telegram.org/bot${TOKEN_TELEGRAM}/sendMessage`, {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify({
+  //         chat_id: CHAT_ID,
+  //         text: `❌ Gagal mengirim laporan setelah ${maxRetries} percobaan.`,
+  //     }),
+  // });
+
+  return { error: 'gagal mengirim Laporan setelah beberapa kali percobaan' }
 }
 
 // 🔹 Mendapatkan tanggal hari ini di zona Jakarta
