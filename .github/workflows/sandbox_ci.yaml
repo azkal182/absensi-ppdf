@@ -47,6 +47,7 @@ jobs:
       - name: Build Next.js app
         env:
           DATABASE_URL: postgresql://azkal:azkal@165.22.106.176:6432/pool_${{ matrix.db }}?schema=public
+          DIRECT_DATABASE_URL: postgresql://azkal:azkal@165.22.106.176:5432/${{ matrix.db }}?schema=public
           NEXTAUTH_URL: ${{ matrix.url }}
           AUTH_TRUST_HOST: ${{ matrix.url }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
