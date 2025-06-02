@@ -95,6 +95,7 @@ jobs:
             pnpm install --production
 
             # Create/update .env file
+            echo "DIRECT_DATABASE_URL=\"postgresql://azkal:azkal@localhost:5432/${{ matrix.db }}?schema=public\"" > .env
             echo "DATABASE_URL=\"postgresql://azkal:azkal@localhost:6432/pool_${{ matrix.db }}?schema=public\"" > .env
             echo "NEXTAUTH_URL=\"${{ matrix.url }}\"" >> .env
             echo "AUTH_TRUST_HOST=\"${{ matrix.url }}\"" >> .env
