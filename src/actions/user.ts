@@ -53,6 +53,7 @@ export const createUser = async (data: UserSchema) => {
         name: data.name,
         username: data.username,
         password: hashedPassword,
+        role: data.role,
         roles: {
           create: {
             role: { connect: { id: data.roleId } },

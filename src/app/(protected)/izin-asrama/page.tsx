@@ -38,6 +38,7 @@ const IzinAsramaPage = async () => {
                   <TableHead>Nama</TableHead>
                   <TableHead>Asrama</TableHead>
                   <TableHead>Kelas</TableHead>
+                  <TableHead>Jam</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -50,6 +51,7 @@ const IzinAsramaPage = async () => {
                     <TableCell>
                       {item.siswa?.kelas?.name} - {item.siswa?.kelas?.teacher}
                     </TableCell>
+                    <TableCell>{item.jamKe.join(',')}</TableCell>
                     <TableCell>{item.izinStatus}</TableCell>
                   </TableRow>
                 ))}

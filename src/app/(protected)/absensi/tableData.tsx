@@ -176,6 +176,8 @@ const TableData = ({ asrama }: { asrama: AsramaProps }) => {
           : 'HADIR',
       }))
 
+      console.log(JSON.stringify(result, null, 2))
+
       setSelectedAttendance((prev) => ({
         ...prev,
         kelasId: id,

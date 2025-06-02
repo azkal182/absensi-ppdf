@@ -43,6 +43,8 @@ export default function UsersPage() {
 
   const handleUpdate = async (data: any) => {
     if (!selectedUser) return
+    // console.log(data)
+
     await updateUser(selectedUser.id, data)
     closeAllModals()
     await loadUsers()

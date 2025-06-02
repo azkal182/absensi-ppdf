@@ -40,14 +40,14 @@ jobs:
 
       - name: Run Prisma Migrations
         env:
-          DIRECT_DATABASE_URL: postgresql://azkal:azkal@165.22.106.176:5432/${{ matrix.db }}
-          DATABASE_URL: postgresql://azkal:azkal@165.22.106.176:6432/pool_${{ matrix.db }}
+          DIRECT_DATABASE_URL: postgresql://azkal:azkal@165.22.106.176:5432/${{ matrix.db }}?pgbouncer=true
+          DATABASE_URL: postgresql://azkal:azkal@165.22.106.176:6432/pool_${{ matrix.db }}?pgbouncer=true
         run: npx prisma migrate deploy || (sleep 10 && npx prisma migrate deploy)
 
       - name: Build Next.js app
         env:
-          DATABASE_URL: postgresql://azkal:azkal@165.22.106.176:6432/pool_${{ matrix.db }}
-          DIRECT_DATABASE_URL: postgresql://azkal:azkal@165.22.106.176:5432/${{ matrix.db }}
+          DATABASE_URL: postgresql://azkal:azkal@165.22.106.176:6432/pool_${{ matrix.db }}?pgbouncer=true
+          DIRECT_DATABASE_URL: postgresql://azkal:azkal@165.22.106.176:5432/${{ matrix.db }}?pgbouncer=true
           NEXTAUTH_URL: ${{ matrix.url }}
           AUTH_TRUST_HOST: ${{ matrix.url }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
@@ -96,8 +96,8 @@ jobs:
             pnpm install --production
 
             # Create/update .env file
-            echo "DIRECT_DATABASE_URL=\"postgresql://azkal:azkal@localhost:5432/${{ matrix.db }}\"" > .env
-            echo "DATABASE_URL=\"postgresql://azkal:azkal@localhost:6432/pool_${{ matrix.db }}\"" > .env
+            echo "DIRECT_DATABASE_URL=\"postgresql://azkal:azkal@localhost:5432/${{ matrix.db }}?pgbouncer=true\"" > .env
+            echo "DATABASE_URL=\"postgresql://azkal:azkal@localhost:6432/pool_${{ matrix.db }}?pgbouncer=true\"" > .env
             echo "NEXTAUTH_URL=\"${{ matrix.url }}\"" >> .env
             echo "AUTH_TRUST_HOST=\"${{ matrix.url }}\"" >> .env
             echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}" >> .env
