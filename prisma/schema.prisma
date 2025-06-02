@@ -9,8 +9,9 @@ generator client {
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_DATABASE_URL")
 }
 
 model User {
@@ -67,6 +68,7 @@ model Asrama {
     Absensi    Absensi[]
     UserAsrama UserAsrama[] // Menghubungkan asrama dengan user
     Siswa      Siswa[]
+    Mengajar   Mengajar[]
 
     @@map("asrama")
 }
@@ -194,4 +196,54 @@ enum IzinEnum {
     SAKIT
     PULANG
     IZIN
+}
+
+model Guru {
+    id       Int        @id @default(autoincrement())
+    name     String
+    mengajar Mengajar[]
+}
+
+model Mengajar {
+    id              Int               @id @default(autoincrement())
+    Guru            Guru?             @relation(fields: [guruId], references: [id])
+    guruId          Int?
+    asramaId        Int
+    asrama          Asrama            @relation(fields: [asramaId], references: [id])
+    jadwalPelajaran JadwalPelajaran[]
+}
+
+model JadwalPelajaran {
+    id          Int           @id @default(autoincrement())
+    Mengajar    Mengajar?     @relation(fields: [mengajarId], references: [id])
+    mengajarId  Int?
+    hari        dayOfWeek
+    jamKe       Int
+    absensiGuru AbsensiGuru[]
+}
+
+enum dayOfWeek {
+    SABTU
+    MINGGU
+    SENIN
+    SELASA
+    RABU
+    KAMIS
+}
+
+model AbsensiGuru {
+    id                Int                 @id @default(autoincrement())
+    JadwalPelajaran   JadwalPelajaran     @relation(fields: [jadwalPelajaranId], references: [id])
+    jadwalPelajaranId Int
+    tanggal           DateTime
+    status            statusKehadiranGuru
+    catatan           String?
+}
+
+enum statusKehadiranGuru {
+    HADIR
+    IZIN
+    SAKIT
+    TELAT
+    ALFA
 }
