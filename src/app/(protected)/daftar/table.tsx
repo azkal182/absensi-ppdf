@@ -488,14 +488,35 @@ export default function AbsensiTable() {
 
   useEffect(() => {
     if (!selectedMonthYear || !selectedKelas) return
+    const bulanIndonesia: Record<string, number> = {
+      Januari: 1,
+      Februari: 2,
+      Maret: 3,
+      April: 4,
+      Mei: 5,
+      Juni: 6,
+      Juli: 7,
+      Agustus: 8,
+      September: 9,
+      Oktober: 10,
+      November: 11,
+      Desember: 12,
+    }
 
     const [selectedMonth, selectedYear] = selectedMonthYear.split(' ')
-    const newMonthIndex =
-      new Date(`${selectedMonth} 1, ${selectedYear}`).getMonth() + 1
+    // const newMonthIndex =
+    //   new Date(`${selectedMonth} 1, ${selectedYear}`).getMonth() + 1
+    const newMonthIndex = bulanIndonesia[selectedMonth] || NaN
     const newYearNumber = parseInt(selectedYear)
+
+    console.log(`Selected Month: ${selectedMonth}, Year: ${selectedYear}`)
+    console.log(
+      `New Month Index: ${newMonthIndex}, Year Number: ${newYearNumber}`
+    )
 
     setMonthIndex(newMonthIndex)
     setYearNumber(newYearNumber)
+    setAbsensi([]) // Reset absensi sebelum memuat data baru
 
     // Memastikan state telah diperbarui sebelum memanggil API
     setTimeout(() => {

@@ -353,6 +353,9 @@ export async function getDaftarAbsen(
   month: number
 ): Promise<Absensi[] | { error: string }> {
   try {
+    console.log(
+      `Fetching absensi for Kelas ID: ${kelasId}, Year: ${year}, Month: ${month}`
+    )
     // Awal bulan di zona WIB (1 Maret 2025 00:00 WIB)
     const startOfMonthWIB = new Date(year, month - 1, 1, 0, 0, 0)
     const startDateUTC = new Date(
