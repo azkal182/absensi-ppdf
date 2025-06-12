@@ -233,6 +233,7 @@ const TableReport = ({ data }: { data: any }) => {
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
                   <Calendar
+                    locale={id}
                     mode="single"
                     selected={date}
                     onSelect={(val) => {
