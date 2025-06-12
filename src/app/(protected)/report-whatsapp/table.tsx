@@ -43,7 +43,7 @@ import {
   deleteReportWhatsapp,
   generatePdf,
   //   sendAbsensiReport,
-  sendAbsensiReportById,
+  //   sendAbsensiReportById,
   updateReportWhatsapp,
 } from '@/actions/report_whatsapp'
 import {
@@ -57,6 +57,15 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { CalendarIcon } from 'lucide-react'
+import { format } from 'date-fns'
+import { id } from 'date-fns/locale'
+import { Calendar } from '@/components/ui/calendar'
 
 const schema = z
   .object({
@@ -93,6 +102,7 @@ const TableReport = ({ data }: { data: any }) => {
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null)
   const [selectedItem, setSelectedItem] =
     useState<Prisma.ReportWhatsappSelect | null>(null)
+  const [date, setDate] = useState<Date>(() => new Date())
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -155,8 +165,13 @@ const TableReport = ({ data }: { data: any }) => {
 
   const sentReport = async (id: number) => {
     try {
-      await sendAbsensiReportById(id)
-      toast.success('Data berhasil dikirim')
+      toast.promise(generatePdf([id], date), {
+        loading: 'Loading...',
+        success: (data) => {
+          return data.message
+        },
+        error: 'Gagal Mengirim Laporan',
+      })
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error: any) {
       toast.error('Data Gagal dikirim')
@@ -183,9 +198,7 @@ const TableReport = ({ data }: { data: any }) => {
     const ids = data
       .filter((item: any) => item.telegram)
       .map((item: any) => item.telegramId)
-    // alert(ids)
-    // alert
-    toast.promise(generatePdf(ids), {
+    toast.promise(generatePdf(ids, date), {
       loading: 'Loading...',
       success: (data) => {
         return data.message
@@ -202,6 +215,33 @@ const TableReport = ({ data }: { data: any }) => {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex justify-end space-x-4">
+            <div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    data-empty={!date}
+                    className="w-[280px] justify-start text-left font-normal data-[empty=true]:text-muted-foreground"
+                  >
+                    <CalendarIcon />
+                    {date ? (
+                      format(date, 'PPP', { locale: id })
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={(val) => {
+                      if (val) setDate(val)
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
             <Button variant={'outline'} onClick={() => sentAllReport()}>
               Kirim Laporan
             </Button>
@@ -266,7 +306,7 @@ const TableReport = ({ data }: { data: any }) => {
                       disabled={!(item.whatsapp || item.telegram)}
                       size="sm"
                       variant="outline"
-                      onClick={() => sentReport(item.id)}
+                      onClick={() => sentReport(item.telegramId)}
                     >
                       Kirim
                     </Button>

@@ -509,11 +509,6 @@ export default function AbsensiTable() {
     const newMonthIndex = bulanIndonesia[selectedMonth] || NaN
     const newYearNumber = parseInt(selectedYear)
 
-    console.log(`Selected Month: ${selectedMonth}, Year: ${selectedYear}`)
-    console.log(
-      `New Month Index: ${newMonthIndex}, Year Number: ${newYearNumber}`
-    )
-
     setMonthIndex(newMonthIndex)
     setYearNumber(newYearNumber)
     setAbsensi([]) // Reset absensi sebelum memuat data baru

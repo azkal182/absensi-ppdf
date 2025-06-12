@@ -51,11 +51,17 @@ interface Asrama {
   kelas: Kelas[]
 }
 
-export const generatePdf = async (telegramId: any) => {
-  const data: any[] | { error: string } = await getDaftarAlfa()
+const formatJakartaDate = (date: Date): string => {
+  const jakartaDate = toZonedTime(new Date(date), JAKARTA_TIMEZONE)
+  return format(jakartaDate, 'yyyy-MM-dd', { timeZone: JAKARTA_TIMEZONE })
+}
+export const generatePdf = async (telegramId: any, date?: Date) => {
+  const data: any[] | { error: string } = await getDaftarAlfa(date)
 
-  const today = getTodayInJakarta()
+  const today = date ? formatJakartaDate(date) : getTodayInJakarta()
+  console.log('Today:', today)
   const formattedDate = formatDate(today)
+  console.log('Formatted Date:', formattedDate)
 
   if ('error' in data || !Array.isArray(data) || data.length === 0) {
     throw new Error('Data tidak tersedia atau terjadi kesalahan.')
@@ -189,7 +195,8 @@ export const generatePdf = async (telegramId: any) => {
     )
     .join('\n')
   const caption = `Laporan Absensi KBM\n${formattedDate}\n\nJumlah Alfa per Asrama:\n${alfaSummary}`
-
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //  @ts-ignore
   const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' })
   // 2. Kirim ke Telegram
   const form = new FormData()

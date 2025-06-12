@@ -353,9 +353,6 @@ export async function getDaftarAbsen(
   month: number
 ): Promise<Absensi[] | { error: string }> {
   try {
-    console.log(
-      `Fetching absensi for Kelas ID: ${kelasId}, Year: ${year}, Month: ${month}`
-    )
     // Awal bulan di zona WIB (1 Maret 2025 00:00 WIB)
     const startOfMonthWIB = new Date(year, month - 1, 1, 0, 0, 0)
     const startDateUTC = new Date(
@@ -960,10 +957,13 @@ export async function getChartThisMonth() {
 //         return { error: 'Terjadi kesalahan saat mengambil data absensi ALFA.' }
 //     }
 // }
-export async function getDaftarAlfa() {
+export async function getDaftarAlfa(date?: Date) {
   try {
     // Ambil waktu saat ini dan ubah ke zona Asia/Jakarta
-    const todayJakarta = toZonedTime(new Date(), 'Asia/Jakarta')
+    const todayJakarta = toZonedTime(
+      date ? new Date(date) : new Date(),
+      'Asia/Jakarta'
+    )
 
     // Kurangi 2 hari dari hari ini
     // todayJakarta.setDate(todayJakarta.getDate() - 1)

@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma'
 
 export async function GET() {
   try {
-    const result = await prisma.$queryRaw`SELECT now()`
+    const result = await prisma.$queryRaw`cd`
     return NextResponse.json({ time: result })
   } catch (err) {
     console.error(err)
