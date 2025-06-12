@@ -214,14 +214,14 @@ const TableReport = ({ data }: { data: any }) => {
           <CardTitle>Report Whatsapp</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex justify-end space-x-4">
-            <div>
+          <div className="mb-4 flex flex-col space-y-2 md:flex-row md:items-center md:space-x-4 md:space-y-0">
+            <div className="w-full md:w-auto">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     data-empty={!date}
-                    className="w-[280px] justify-start text-left font-normal data-[empty=true]:text-muted-foreground"
+                    className="w-full justify-start text-left font-normal data-[empty=true]:text-muted-foreground md:w-[200px]"
                   >
                     <CalendarIcon />
                     {date ? (
@@ -242,11 +242,15 @@ const TableReport = ({ data }: { data: any }) => {
                 </PopoverContent>
               </Popover>
             </div>
-            <Button variant={'outline'} onClick={() => sentAllReport()}>
-              Kirim Laporan
-            </Button>
-            <Button onClick={() => handleOpenModal()}>Add</Button>
+
+            <div className="flex w-full flex-col space-y-2 md:w-auto md:flex-row md:space-x-4 md:space-y-0">
+              <Button variant="outline" onClick={() => sentAllReport()}>
+                Kirim Laporan
+              </Button>
+              <Button onClick={() => handleOpenModal()}>Add</Button>
+            </div>
           </div>
+
           <Table>
             <TableCaption>A list of your recent reports.</TableCaption>
             <TableHeader>
