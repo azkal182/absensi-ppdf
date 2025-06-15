@@ -669,85 +669,85 @@ export const getKelasById = async (kelasId: number) => {
   }
 }
 
-export async function getChartThisMonth() {
-  try {
-    const now = new Date()
-    const startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+// export async function getChartThisMonth() {
+//   try {
+//     const now = new Date()
+//     const startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+//     const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 
-    const absensiByAsrama = await prisma.asrama.findMany({
-      include: {
-        Absensi: {
-          where: {
-            date: {
-              gte: startDate.toISOString(),
-              lte: endDate.toISOString(),
-            },
-          },
-          select: {
-            status: true,
-            date: true,
-          },
-        },
-      },
-    })
+//     const absensiByAsrama = await prisma.asrama.findMany({
+//       include: {
+//         Absensi: {
+//           where: {
+//             date: {
+//               gte: startDate.toISOString(),
+//               lte: endDate.toISOString(),
+//             },
+//           },
+//           select: {
+//             status: true,
+//             date: true,
+//           },
+//         },
+//       },
+//     })
 
-    const formattedResult = absensiByAsrama.map((asrama) => {
-      const statusCount = asrama.Absensi.reduce(
-        (acc, absen) => {
-          acc[absen.status] = (acc[absen.status] || 0) + 1
-          return acc
-        },
-        {} as Record<string, number>
-      )
+//     const formattedResult = absensiByAsrama.map((asrama) => {
+//       const statusCount = asrama.Absensi.reduce(
+//         (acc, absen) => {
+//           acc[absen.status] = (acc[absen.status] || 0) + 1
+//           return acc
+//         },
+//         {} as Record<string, number>
+//       )
 
-      const totalAbsensi = asrama.Absensi.length
-      // Menghitung total hari unik dalam pengabsenan
-      const uniqueDates = new Set(
-        asrama.Absensi.map(
-          (absen) => new Date(absen.date).toISOString().split('T')[0]
-        )
-      )
-      const totalDays = uniqueDates.size // Jumlah tanggal unik
+//       const totalAbsensi = asrama.Absensi.length
+//       // Menghitung total hari unik dalam pengabsenan
+//       const uniqueDates = new Set(
+//         asrama.Absensi.map(
+//           (absen) => new Date(absen.date).toISOString().split('T')[0]
+//         )
+//       )
+//       const totalDays = uniqueDates.size // Jumlah tanggal unik
 
-      // Jika totalAbsensi = 0, anggap semua 100% HADIR
-      const percent =
-        totalAbsensi === 0
-          ? { HADIR: '100%', SAKIT: '0%', IZIN: '0%', ALFA: '0%' }
-          : {
-              HADIR:
-                (((statusCount.HADIR || 0) / totalAbsensi) * 100).toFixed(2) +
-                '%',
-              SAKIT:
-                (((statusCount.SAKIT || 0) / totalAbsensi) * 100).toFixed(2) +
-                '%',
-              IZIN:
-                (((statusCount.IZIN || 0) / totalAbsensi) * 100).toFixed(2) +
-                '%',
-              ALFA:
-                (((statusCount.ALFA || 0) / totalAbsensi) * 100).toFixed(2) +
-                '%',
-            }
+//       // Jika totalAbsensi = 0, anggap semua 100% HADIR
+//       const percent =
+//         totalAbsensi === 0
+//           ? { HADIR: '100%', SAKIT: '0%', IZIN: '0%', ALFA: '0%' }
+//           : {
+//               HADIR:
+//                 (((statusCount.HADIR || 0) / totalAbsensi) * 100).toFixed(2) +
+//                 '%',
+//               SAKIT:
+//                 (((statusCount.SAKIT || 0) / totalAbsensi) * 100).toFixed(2) +
+//                 '%',
+//               IZIN:
+//                 (((statusCount.IZIN || 0) / totalAbsensi) * 100).toFixed(2) +
+//                 '%',
+//               ALFA:
+//                 (((statusCount.ALFA || 0) / totalAbsensi) * 100).toFixed(2) +
+//                 '%',
+//             }
 
-      return {
-        asrama: asrama.name,
-        totalDays,
-        totalAbsensi,
-        HADIR: statusCount.HADIR || 0,
-        SAKIT: statusCount.SAKIT || 0,
-        IZIN: statusCount.IZIN || 0,
-        ALFA: statusCount.ALFA || 0,
-        percent,
-      }
-    })
+//       return {
+//         asrama: asrama.name,
+//         totalDays,
+//         totalAbsensi,
+//         HADIR: statusCount.HADIR || 0,
+//         SAKIT: statusCount.SAKIT || 0,
+//         IZIN: statusCount.IZIN || 0,
+//         ALFA: statusCount.ALFA || 0,
+//         percent,
+//       }
+//     })
 
-    return formattedResult
-  } catch (error) {
-    console.error('Error fetching absensi:', error)
-    // return { error: 'Terjadi kesalahan saat mengambil data absensi.' }
-    return []
-  }
-}
+//     return formattedResult
+//   } catch (error) {
+//     console.error('Error fetching absensi:', error)
+//     // return { error: 'Terjadi kesalahan saat mengambil data absensi.' }
+//     return []
+//   }
+// }
 
 // export async function getDaftarAlfa() {
 //     try {
@@ -957,6 +957,88 @@ export async function getChartThisMonth() {
 //         return { error: 'Terjadi kesalahan saat mengambil data absensi ALFA.' }
 //     }
 // }
+
+export async function getChartThisMonth(month?: number, year?: number) {
+  try {
+    const now = new Date()
+    const usedYear = year ?? now.getFullYear()
+    const usedMonth = month ?? now.getMonth() + 1 // month (1–12)
+
+    const startDate = new Date(usedYear, usedMonth - 1, 1)
+    const endDate = new Date(usedYear, usedMonth, 0) // 0 = last day of previous month
+
+    const absensiByAsrama = await prisma.asrama.findMany({
+      include: {
+        Absensi: {
+          where: {
+            date: {
+              gte: startDate.toISOString(),
+              lte: endDate.toISOString(),
+            },
+          },
+          select: {
+            status: true,
+            date: true,
+          },
+        },
+      },
+    })
+
+    const formattedResult = absensiByAsrama.map((asrama) => {
+      const statusCount = asrama.Absensi.reduce(
+        (acc, absen) => {
+          acc[absen.status] = (acc[absen.status] || 0) + 1
+          return acc
+        },
+        {} as Record<string, number>
+      )
+
+      const totalAbsensi = asrama.Absensi.length
+
+      const uniqueDates = new Set(
+        asrama.Absensi.map(
+          (absen) => new Date(absen.date).toISOString().split('T')[0]
+        )
+      )
+      const totalDays = uniqueDates.size
+
+      const percent =
+        totalAbsensi === 0
+          ? { HADIR: '100%', SAKIT: '0%', IZIN: '0%', ALFA: '0%' }
+          : {
+              HADIR:
+                (((statusCount.HADIR || 0) / totalAbsensi) * 100).toFixed(2) +
+                '%',
+              SAKIT:
+                (((statusCount.SAKIT || 0) / totalAbsensi) * 100).toFixed(2) +
+                '%',
+              IZIN:
+                (((statusCount.IZIN || 0) / totalAbsensi) * 100).toFixed(2) +
+                '%',
+              ALFA:
+                (((statusCount.ALFA || 0) / totalAbsensi) * 100).toFixed(2) +
+                '%',
+            }
+
+      return {
+        asrama: asrama.name,
+        totalDays,
+        totalAbsensi,
+        HADIR: statusCount.HADIR || 0,
+        SAKIT: statusCount.SAKIT || 0,
+        IZIN: statusCount.IZIN || 0,
+        ALFA: statusCount.ALFA || 0,
+        percent,
+      }
+    })
+
+    return formattedResult
+  } catch (error) {
+    console.error('Error fetching absensi:', error)
+    return []
+  }
+}
+
 export async function getDaftarAlfa(date?: Date) {
   try {
     // Ambil waktu saat ini dan ubah ke zona Asia/Jakarta

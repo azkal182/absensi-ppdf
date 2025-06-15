@@ -14,7 +14,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Bar, BarChart, XAxis, YAxis } from 'recharts'
-import { format } from 'date-fns'
 
 const chartConfig = {
   HADIR: { label: 'HADIR', color: 'hsl(var(--chart-1))' },
@@ -40,8 +39,9 @@ export interface AbsensiData {
 
 interface Props {
   chartData: AbsensiData[]
+  title?: string
 }
-const ChartThisMonth = ({ chartData }: Props) => {
+const ChartThisMonth = ({ chartData, title }: Props) => {
   const chartDataThisMonth = chartData?.map((asrama) => ({
     asrama: asrama.asrama,
     HADIR: parseFloat(asrama.percent.HADIR.replace('%', '')),
@@ -56,7 +56,7 @@ const ChartThisMonth = ({ chartData }: Props) => {
           Persentase Kehadiran Global
         </CardTitle>
         <CardDescription className="text-center">
-          {format(new Date(), 'MMMM-yyyy')}
+          {title && <h3 className="mb-2 text-lg font-bold">{title}</h3>}
         </CardDescription>
       </CardHeader>
       <CardContent>
