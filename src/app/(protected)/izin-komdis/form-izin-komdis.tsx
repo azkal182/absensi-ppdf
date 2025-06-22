@@ -40,7 +40,18 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-
+const toUtc = (date: Date, hour: number, minute: number) => {
+  return new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      hour - 7, // konversi WIB → UTC
+      minute,
+      0
+    )
+  ).toISOString()
+}
 export function FormIzinKomdis() {
   const { session } = useCurrentSession()
   const [searchValue, setSearchValue] = useState('')
@@ -51,6 +62,8 @@ export function FormIzinKomdis() {
   const [izin, setIzin] = useState('')
   const [openJam, setOpenJam] = useState(false)
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]) // Mulai dengan array kosong
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // jam 00:00 lokal (WIB)
 
   const handleValueChange = (values: number[]) => {
     setSelectedNumbers(values)
@@ -67,6 +80,8 @@ export function FormIzinKomdis() {
         data: {
           description: 'komdis',
           jamKe: [],
+          startDate: toUtc(today, 0, 0),
+          endDate: null,
           onlyOneDay: false,
           izinStatus: 'PULANG',
           siswaId: selectedSantri.id,

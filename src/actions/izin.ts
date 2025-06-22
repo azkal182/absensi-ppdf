@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use server'
 import prisma from '@/lib/prisma'
+import { DateTime } from 'luxon'
 import { revalidatePath } from 'next/cache'
 
 export type CreateIzinDto = {
   description: string
   jamKe?: number[]
-  startDate?: Date
-  endDate?: Date | null
+  startDate: string // hasil .toISOString()
+  endDate?: string | null
   onlyOneDay: boolean
   izinStatus?: string
   siswaId?: number | null
@@ -42,33 +43,17 @@ function convertJakartaToUTC(date: Date) {
 }
 
 export const createIzin = async ({ data }: { data: CreateIzinDto }) => {
-  const serverUtcDate = new Date() // Waktu di server (UTC)
-  const jakartaMidnight = setJakartaMidnight(serverUtcDate) // Set ke 00:00:00 di Jakarta
-  const backToUtc = convertJakartaToUTC(jakartaMidnight) // Kembalikan ke UTC
-
-  console.log(serverUtcDate)
-  console.log(jakartaMidnight)
-  console.log(backToUtc)
-
-  console.log({
-    data: {
-      description: data.description,
-      jamKe: data.jamKe,
-      startDate: backToUtc,
-      onlyOneDay: data.onlyOneDay,
-      izinStatus: data.izinStatus as any,
-      siswaId: data.siswaId,
-      userId: data.userId,
-    },
-  })
+  //   const serverUtcDate = new Date() // Waktu di server (UTC)
+  //   const jakartaMidnight = setJakartaMidnight(serverUtcDate) // Set ke 00:00:00 di Jakarta
+  //   const backToUtc = convertJakartaToUTC(jakartaMidnight) // Kembalikan ke UTC
 
   try {
     const izin = await prisma.izin.create({
       data: {
         description: data.description,
         jamKe: data.jamKe,
-        startDate: backToUtc,
-        endDate: null,
+        startDate: data.startDate!,
+        endDate: data.endDate ?? null,
         onlyOneDay: data.onlyOneDay,
         izinStatus: data.izinStatus as any,
         siswaId: data.siswaId,
@@ -89,15 +74,29 @@ export const createIzin = async ({ data }: { data: CreateIzinDto }) => {
   }
 }
 
+function getTodayWIBRangeUTC() {
+  const todayWIB = DateTime.now().setZone('Asia/Jakarta')
+
+  const startOfDayUTC = todayWIB.startOf('day').toUTC().toJSDate()
+  const endOfDayUTC = todayWIB.endOf('day').toUTC().toJSDate()
+  return { startOfDayUTC, endOfDayUTC }
+}
+
 export const getIzinKeamanan = async () => {
+  const { startOfDayUTC, endOfDayUTC } = getTodayWIBRangeUTC()
+
   return await prisma.izin.findMany({
     where: {
       OR: [
         {
           endDate: null,
-          onlyOneDay: false,
           keamanan: true,
         },
+        // {
+        //   endDate: null,
+        //   onlyOneDay: false,
+        //   keamanan: true,
+        // },
       ],
     },
     include: {

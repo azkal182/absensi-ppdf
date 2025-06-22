@@ -42,6 +42,24 @@ import {
 import MultiSelectCombobox from './multi'
 import { MultiSelectJam } from '@/components/multi-select-jam'
 import { toast } from 'sonner'
+import { type DateRange } from 'react-day-picker'
+import { Calendar } from '@/components/ui/calendar'
+import { CalendarIcon } from 'lucide-react'
+import { format } from 'date-fns'
+import { id } from 'date-fns/locale'
+
+const toUtc = (date: Date, hour: number, minute: number) => {
+  return new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      hour - 7, // konversi WIB → UTC
+      minute,
+      0
+    )
+  ).toISOString()
+}
 
 export function SantriCombobox() {
   const { session } = useCurrentSession()
@@ -53,6 +71,13 @@ export function SantriCombobox() {
   const [izin, setIzin] = useState('')
   const [openJam, setOpenJam] = useState(false)
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]) // Mulai dengan array kosong
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // jam 00:00 lokal (WIB)
+
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: today,
+    to: today,
+  })
 
   const handleValueChange = (values: number[]) => {
     setSelectedNumbers(values)
@@ -69,6 +94,22 @@ export function SantriCombobox() {
         toast.error('Izin tidak boleh kosong')
         return
       } else {
+        // alert(
+        //   JSON.stringify(
+        //     {
+        //       description: 'asrama',
+        //       jamKe: selectedNumbers,
+        //       onlyOneDay: true,
+        //       izinStatus: izin,
+        //       siswaId: selectedSantri.id,
+        //       userId: session!.user!.id as any,
+        //       startDate: dateRange?.from ? toUtc(dateRange.from, 0, 0) : null,
+        //       endDate: dateRange?.to ? toUtc(dateRange.to, 23, 59) : null,
+        //     },
+        //     null,
+        //     2
+        //   )
+        // )
         await createIzin({
           data: {
             description: 'asrama',
@@ -77,6 +118,8 @@ export function SantriCombobox() {
             izinStatus: izin,
             siswaId: selectedSantri.id,
             userId: session!.user!.id as any,
+            startDate: toUtc(dateRange!.from!, 0, 0),
+            endDate: toUtc(dateRange!.to!, 23, 59),
           },
         })
         setModalOpen(false)
@@ -113,6 +156,65 @@ export function SantriCombobox() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tanggal" className="text-right">
+                Tanggal
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="tanggal"
+                    variant="outline"
+                    className="col-span-3 w-full justify-start text-left font-normal"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateRange?.from ? (
+                      dateRange.to ? (
+                        <>
+                          {format(dateRange.from, 'dd/MMM', { locale: id })} -{' '}
+                          {format(dateRange.to, 'dd/MMM', { locale: id })}
+                        </>
+                      ) : (
+                        format(dateRange.from, 'dd/MMM', { locale: id })
+                      )
+                    ) : (
+                      <span>Pilih rentang tanggal</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={dateRange?.from}
+                    selected={dateRange}
+                    onSelect={(range) => {
+                      if (
+                        range?.from &&
+                        range.to &&
+                        range.from.getTime() === range.to.getTime()
+                      ) {
+                        const adjustedTo = new Date(
+                          Date.UTC(
+                            range.to.getFullYear(),
+                            range.to.getMonth(),
+                            range.to.getDate(),
+                            16,
+                            59,
+                            0 // jam 23:59 WIB (16:59 UTC)
+                          )
+                        )
+                        setDateRange({ from: range.from, to: adjustedTo })
+                      } else {
+                        setDateRange(range)
+                      }
+                    }}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="search" className="text-right">
                 Cari

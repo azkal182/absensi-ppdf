@@ -39,15 +39,22 @@ export async function getClassByAsramaId(asramaId: number) {
   }
 }
 
+function getTodayWIBRangeUTC() {
+  const todayWIB = DateTime.now().setZone('Asia/Jakarta')
+
+  const startOfDayUTC = todayWIB.startOf('day').toUTC().toJSDate()
+  const endOfDayUTC = todayWIB.endOf('day').toUTC().toJSDate()
+  return { startOfDayUTC, endOfDayUTC }
+}
 // GET: Ambil data Asrama, Kelas, dan Siswa
 export async function getDataByKelasId(kelasId: number) {
-  const now = DateTime.now().setZone('Asia/Jakarta')
+  //   const now = DateTime.now().setZone('Asia/Jakarta')
 
-  const startOfDayUTC = now.startOf('day').toUTC().toJSDate()
-  const endOfDayUTC = now.endOf('day').toUTC().toJSDate()
+  //   const startOfDayUTC = now.startOf('day').toUTC().toJSDate()
+  //   const endOfDayUTC = now.endOf('day').toUTC().toJSDate()
 
-  console.log(startOfDayUTC, endOfDayUTC)
-
+  const { startOfDayUTC, endOfDayUTC } = getTodayWIBRangeUTC()
+  console.log({ startOfDayUTC, endOfDayUTC })
   try {
     const siswa = await prisma.siswa.findMany({
       where: {
@@ -57,14 +64,27 @@ export async function getDataByKelasId(kelasId: number) {
         izin: {
           where: {
             OR: [
-              // izin hanya sehari
               {
                 startDate: {
-                  gte: startOfDayUTC,
                   lt: endOfDayUTC,
                 },
-                onlyOneDay: true,
+                OR: [
+                  {
+                    endDate: {
+                      gt: startOfDayUTC,
+                    },
+                  },
+                  { endDate: null },
+                ],
               },
+
+              //   {
+              //     startDate: {
+              //       gte: startOfDayUTC,
+              //       lt: endOfDayUTC,
+              //     },
+              //     onlyOneDay: true,
+              //   },
               // izin berlaku dengan tanggal selesai tidak ditentukan
               {
                 //   startDate: new Date(),

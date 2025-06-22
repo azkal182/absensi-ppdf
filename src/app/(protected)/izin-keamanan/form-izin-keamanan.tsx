@@ -40,6 +40,22 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { format } from 'date-fns'
+import { id } from 'date-fns/locale'
+import { DateRange } from 'react-day-picker'
+
+const toUtc = (date: Date, hour: number, minute: number) => {
+  return new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      hour - 7, // konversi WIB → UTC
+      minute,
+      0
+    )
+  ).toISOString()
+}
 
 export function FormIzinKeamanan() {
   const { session } = useCurrentSession()
@@ -51,6 +67,8 @@ export function FormIzinKeamanan() {
   const [izin, setIzin] = useState('')
   const [openJam, setOpenJam] = useState(false)
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]) // Mulai dengan array kosong
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // jam 00:00 lokal (WIB)
 
   const handleValueChange = (values: number[]) => {
     setSelectedNumbers(values)
@@ -68,6 +86,8 @@ export function FormIzinKeamanan() {
           description: 'keamanan',
           jamKe: [],
           onlyOneDay: false,
+          startDate: toUtc(today, 0, 0),
+          endDate: null,
           izinStatus: 'PULANG',
           siswaId: selectedSantri.id,
           userId: session!.user!.id as any,
